@@ -16,7 +16,7 @@ namespace MediConsultMobileApi.Repository
         public async Task<MessageDto> Login(LoginUserDto userDto)
         {
             var authDto = new MessageDto();
-            var user = await dbContext.logins.Where(u => u.member_id ==int.Parse(userDto.Id) && u.the_password == userDto.Password).FirstOrDefaultAsync();
+            var user = await dbContext.logins.FirstOrDefaultAsync(u => u.member_id == int.Parse(userDto.Id) && u.the_password == userDto.Password);
          
             if (user is null)
             {

@@ -1,11 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace MediConsultMobileApi.Models
+﻿namespace MediConsultMobileApi.DTO
 {
-    [Table("app_en_get_medical_network_map_view")]
-    [Keyless]
-    public class MedicalNetwork
+    public class MedicalNetworkDTO
     {
         public string? Latitude { get; set; }
         public string? Longitude { get; set; }

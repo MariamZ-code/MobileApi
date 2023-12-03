@@ -13,7 +13,13 @@ namespace MediConsultMobileApi.Repository
         {
             this.dbContext = dbContext;
         }
+        
 
+        public async Task<bool> MemberExistsAsync(int? memberId)
+        {
+            return await dbContext.Members.AnyAsync(m => m.member_id == memberId);
+
+        }
 
         public async Task<Member> GetByID(int id)
         {
@@ -24,36 +30,16 @@ namespace MediConsultMobileApi.Repository
         public async Task<MessageDto> validation(Member member)
         {
             var msg = new MessageDto();
+
             
-            if (member is null)
-            {
-                msg.Message = "User not Found";
-                return msg;
-            }
-            else
-            {
-
-                if (member.program_name is null)
-                {
-                    msg.Message = "User in Archive";
-                    return msg;
-                }
-                if (member.member_status == "Deactivated")
-                {
-                    msg.Message = "User is Deactivated";
-
-                    return msg;
-                }
-                else if (member.member_status == "Hold")
-                {
-                    msg.Message = "User is Hold";
-                    return msg;
-
-                }
-                
-            }
+            
 
             return msg;
+        }
+
+        public Task<ClientBranchMember> Edit(MemberDto memberDto)
+        {
+
         }
     }
 }

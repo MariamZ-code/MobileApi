@@ -3,10 +3,8 @@ using MediConsultMobileApi.Models;
 
 namespace MediConsultMobileApi.Repository.Interfaces
 {
-    public interface IAuthRepository
+    public interface ITokenRepository
     {
-        Task<MessageDto> Login(LoginUserDto userDto);
-
-
+        Task<Login> SaveToken(FirebaseTokenDTO tokenDto);
     }
 }

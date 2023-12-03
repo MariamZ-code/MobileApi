@@ -26,7 +26,7 @@ namespace MediConsultMobileApi.Controllers
             var valid = await memberRepo.validation(member); // msg 
             if (valid.Message is null)
             {
-                //var folder = System.IO.Directory.CreateDirectory("P");
+                
                 var service = await serviceRepo.GetById(member);
                 return Ok(service);
 

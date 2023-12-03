@@ -26,15 +26,39 @@ namespace MediConsultMobileApi.Controllers
         [HttpGet("Id")]
         public async Task<IActionResult> GetById(int id)
         {
-           
-            var member = await memberRepo.GetByID(id); // member 
-            var valid = await memberRepo.validation(member); // msg 
-            if (valid.Message is null)
-            {
-                return Ok(member);
 
+            if (ModelState.IsValid)
+            {
+                var member = await memberRepo.GetByID(id); // member 
+                var msg = new MessageDto();
+
+                if (member is null )
+                {
+                return BadRequest(new MessageDto { Message ="User Not found "});
+
+                }
+                if (member.program_name is null)
+                {
+                    msg.Message = "User in Archive";
+                    return BadRequest(msg);
+                }
+                if (member.member_status == "Deactivated")
+                {
+                    msg.Message = "User is Deactivated";
+
+                    return BadRequest(msg);
+
+                }
+                if (member.member_status == "Hold")
+                {
+                    msg.Message = "User is Hold";
+                    return BadRequest(msg);
+
+
+                }
+                return Ok(member);
             }
-            return BadRequest(valid.Message);
+            return BadRequest(ModelState);
         }
 
 
