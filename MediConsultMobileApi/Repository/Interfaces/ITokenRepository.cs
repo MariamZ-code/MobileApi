@@ -5,6 +5,6 @@ namespace MediConsultMobileApi.Repository.Interfaces
 {
     public interface ITokenRepository
     {
-        Task<Login> SaveToken(FirebaseTokenDTO tokenDto);
+        Login SaveToken(FirebaseTokenDTO tokenDto);
     }
 }

@@ -10,7 +10,7 @@ namespace MediConsultMobileApi.DTO
 
         public string Password { get; set; }
 
-        public string? Firebase_token { get; set; }
+        public string Firebase_token { get; set; }
 
     }
 }

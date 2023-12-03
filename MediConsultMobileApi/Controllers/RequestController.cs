@@ -1,7 +1,9 @@
 ﻿using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace MediConsultMobileApi.Controllers
 {
@@ -33,24 +35,29 @@ namespace MediConsultMobileApi.Controllers
 
                 var providerExists = await providerRepo.ProviderExistsAsync(requestDto.Provider_id);
                 var memberExists = await memberRepo.MemberExistsAsync(requestDto.Member_id);
-                if (requestDto.Provider_id == null)
+                if (requestDto.Provider_id is null)
                 {
                     return BadRequest("Enter Provider Id");
                 }
 
-                if (requestDto.Member_id == null)
+                if (requestDto.Member_id is null)
                 {
                     return BadRequest("Enter member Id");
                 }
-                if (!providerExists || !memberExists)
+                if (!providerExists )
                 {
-                    return BadRequest("Provider Id or Member Id not found");
+                    return BadRequest("Provider Id not found");
                 }
-                
-                    for (int i = 0; i < files.Count; i++)
+                if (!memberExists)
+                {
+                    return BadRequest("Member Id not found");
+
+                }
+
+                for (int i = 0; i < files.Count; i++)
                     {
 
-                        if (files[i] == null || files[i].Length == 0)
+                        if (files[i] is null || files[i].Length == 0)
                         {
                             return BadRequest("No file uploaded.");
                         }
@@ -103,39 +110,46 @@ namespace MediConsultMobileApi.Controllers
 
 
         [HttpGet("MemberId")]
-        public async Task<IActionResult> GetbyId(int id , string? status , string? datefrom ,string? dateTo , string? provider)
+        
+        public IActionResult GetbyMemberId([Required] int memberId, string? datefrom, string? dateTo ,[FromQuery] string[]? status, [FromQuery] string[]? providers)
         {
             if (ModelState.IsValid)
             {
-               var requests= requestRepo.GetRequestsByMemberId(id);
-            
-                if (requests is null)
-                {
-                    return NotFound("Request not found");
+                var requests = requestRepo.GetRequestsByMemberId(memberId);
 
-                }
-                else
+                foreach (var request in requests)
                 {
-                    if (status is not null)
+                    if (request is null)
                     {
-                        requests = requests.Where(r => r.Status.Contains(status)).ToList();
+                        return NotFound("Request not found");
+
                     }
                     if (datefrom is not null)
                     {
-                        requests = requests.Where(r => r.created_date.Contains(datefrom)).ToList();
+                        requests = requests.Where(x => x.created_date.Contains(datefrom));
                     }
                     if (dateTo is not null)
                     {
-                        requests = requests.Where(r => r.created_date.Contains(dateTo)).ToList();
+                        requests = requests.Where(x => x.created_date.Contains(dateTo));
                     }
-                    if (provider is not null)
+                    if (status != null && status.Any())
                     {
-                        requests = requests.Where(r => r.created_date.Contains(provider)).ToList();
+                        for (int i = 0; i < status.Length; i++)
+                        {
+                            var sta = status[i];
+                        }
+                        requests = requests.Where(c => status.Contains(c.Status));
                     }
-
-
-                    return Ok(requests);
+                    if (providers != null && providers.Any())
+                    {
+                        for (int i = 0; i < providers.Length; i++)
+                        {
+                            var provider = providers[i];
+                        }
+                        requests = requests.Where(p => providers.Contains(p.Provider.Provider_name_en));
+                    }
                 }
+                return Ok(requests);
             }
             return BadRequest(ModelState);
 

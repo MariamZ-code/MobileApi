@@ -1,6 +1,7 @@
 ﻿using MediConsultMobileApi.DTO;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediConsultMobileApi.Repository
 {
@@ -12,16 +13,20 @@ namespace MediConsultMobileApi.Repository
         {
             this.dbContext = dbContext;
         }
-        public async Task<Login> SaveToken(FirebaseTokenDTO tokenDto)
+        public Login SaveToken(FirebaseTokenDTO tokenDto)
         {
-            var token = new Login()
-            {
-                firebase_token = tokenDto.Firebase_token
-            };
+           
+                var token = new Login()
+                {
+                    member_id = tokenDto.MemberId,
+                    firebase_token = tokenDto.Firebase_token
+                };
+
+                dbContext.Update(token);
+                dbContext.SaveChanges();
+                return token;
             
-            await dbContext.AddAsync(token);
-            dbContext.SaveChanges();
-            return token;
+            
         }
     }
 }

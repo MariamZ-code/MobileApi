@@ -14,17 +14,22 @@ namespace MediConsultMobileApi.Repository
         {
             this.dbContext = dbContext;
         }
-        public IQueryable<MedicalNetwork> GetAll(string? providerName,  string? category)
+        public IQueryable<MedicalNetwork> GetAll(string? providerName, string[]? categories)
         {
             var medicalResult =  dbContext.medicalNetworks.AsNoTracking().AsQueryable();
             if (providerName is not null)
             {
                 medicalResult = medicalResult.Where(x => x.Provider_name.Contains(providerName));
             }
-            if (category is not null)
+            if (categories != null && categories.Any())
             {
-                medicalResult = medicalResult.Where(x => x.Category.Contains(category));
+                for (int i = 0; i < categories.Length; i++)
+                {
+                    var status = categories[i];
+                }
+                medicalResult = medicalResult.Where(c => categories.Contains(c.Category));
             }
+           
            
 
             return medicalResult;

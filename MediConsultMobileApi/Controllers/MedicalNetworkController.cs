@@ -1,4 +1,5 @@
-﻿using MediConsultMobileApi.Repository.Interfaces;
+﻿using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -17,7 +18,7 @@ namespace MediConsultMobileApi.Controllers
         }
         [HttpGet]
 
-        public IActionResult MedicalNetwork([FromQuery] string? providerName , [FromQuery] string? categories , int StartPage = 1, int pageSize = 10)
+        public IActionResult MedicalNetwork([FromQuery] string? providerName , [FromQuery] string[]? categories , int StartPage = 1, int pageSize = 10)
         {
 
             if (ModelState.IsValid)
@@ -25,7 +26,7 @@ namespace MediConsultMobileApi.Controllers
                 var medicalNet = medicalRepo.GetAll(providerName , categories);
                 var totalCount = medicalNet.Count();
                 medicalNet = medicalNet.Skip((StartPage - 1) * pageSize).Take(pageSize);
-                if (medicalNet == null) { return BadRequest("Not found"); }
+                if (medicalNet == null) { return BadRequest(new MessageDto { Message = "Not found" }); }
                 return Ok(medicalNet);
                 
             }

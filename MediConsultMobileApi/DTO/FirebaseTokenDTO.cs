@@ -2,7 +2,7 @@
 {
     public class FirebaseTokenDTO
     {
-        public string MemberId { get; set; }
+        public int MemberId { get; set; }
 
         public string? Firebase_token { get; set; }
     }

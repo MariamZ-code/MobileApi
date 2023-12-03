@@ -16,7 +16,7 @@ namespace MediConsultMobileApi.Models
         public int is_enabled { get; set; }
 
         // TODO : Add Column to DB
-        public string? firebase_token { get; set; }
+        public string firebase_token { get; set; }
 
     }
 

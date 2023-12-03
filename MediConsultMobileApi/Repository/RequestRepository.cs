@@ -43,9 +43,12 @@ namespace MediConsultMobileApi.Repository
 
         }
 
-        public  List<Request> GetRequestsByMemberId(int id)
+        public  IQueryable<Request> GetRequestsByMemberId(int memberId)
         {
-            var member =  dbContext.Requests.Where(r => r.Member_id == id).AsNoTracking().ToList();
+
+            var member =  dbContext.Requests.Where(r => r.Member_id == memberId).AsNoTracking().AsQueryable();
+            
+            
             return member;
             
             

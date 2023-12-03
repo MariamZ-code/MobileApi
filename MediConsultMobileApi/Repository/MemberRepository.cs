@@ -31,15 +31,40 @@ namespace MediConsultMobileApi.Repository
         {
             var msg = new MessageDto();
 
-            
-            
+            if (member is null)
+            {
+                msg.Message = "User in Archive";
+                return msg;
+
+            }
+            if (member.program_name is null)
+            {
+                msg.Message = "User in Archive";
+                return msg;
+
+            }
+            if (member.member_status == "Deactivated")
+            {
+                msg.Message = "User is Deactivated";
+
+                return msg;
+
+
+            }
+            if (member.member_status == "Hold")
+            {
+                msg.Message = "User is Hold";
+                return msg;
+            }
+
+
 
             return msg;
         }
 
-        public Task<ClientBranchMember> Edit(MemberDto memberDto)
-        {
+        //public Task<ClientBranchMember> Edit(MemberDto memberDto)
+        //{
 
-        }
+        //}
     }
 }

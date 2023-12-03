@@ -29,7 +29,7 @@ namespace MediConsultMobileApi.Models
         public DbSet<ProviderCategory> providerCategories { get; set; }
         public DbSet<ProviderData> Providers { get; set; }
         public DbSet<Request> Requests { get; set; }
-        public DbSet<ClientBranchMember> clientBranchMembers {  get; set; }
+    
 
     }
 }

@@ -10,7 +10,7 @@ namespace MediConsultMobileApi.Repository.Interfaces
         Task<MessageDto> validation(Member member);
         Task<Member> GetByID(int id);
 
-        Task<ClientBranchMember> Edit(MemberDto memberDto);
+
 
     }
 }
