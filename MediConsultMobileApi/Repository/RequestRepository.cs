@@ -19,7 +19,8 @@ namespace MediConsultMobileApi.Repository
         {
             this.dbContext = dbContext;
         }
-        public  Request AddRequest(RequestDTO requestDto)
+        #region AddNewRequest
+        public Request AddRequest(RequestDTO requestDto)
         {
             var serverPath = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -32,27 +33,42 @@ namespace MediConsultMobileApi.Repository
                 Notes = requestDto.Notes,
                 Member_id = requestDto.Member_id,
                 Folder_path = folder,
-                
-            
-            };
-                         dbContext.Add(request);
-                        dbContext.SaveChanges();
 
-                        return request;
-          
+
+            };
+            dbContext.Add(request);
+            dbContext.SaveChanges();
+
+            return request;
+
 
         }
 
-        public  IQueryable<Request> GetRequestsByMemberId(int memberId)
+        #endregion
+
+
+        #region RequestByMemberId
+        public IQueryable<Request> GetRequestsByMemberId(int memberId)
         {
 
-            var member =  dbContext.Requests.Where(r => r.Member_id == memberId).AsNoTracking().AsQueryable();
-            
-            
-            return member;
-            
-            
+            var members = dbContext.Requests.Include(p => p.Provider).Where(r => r.Member_id == memberId).AsNoTracking().AsQueryable();
+
+
+
+            return members;
+
+
         }
+
+        #endregion
+
+
+        #region RequestBy RequestId
+        public async Task<Request> GetById(int RequestId)
+        {
+            return await dbContext.Requests.FirstOrDefaultAsync(r => r.ID == RequestId);
+        }
+        #endregion
 
 
     }  

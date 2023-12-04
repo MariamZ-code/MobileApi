@@ -17,7 +17,6 @@ namespace MediConsultMobileApi.Models
 
         [StringLength(100)]
         public string? Status { get; set; } = "Pending";
-        public int? Approval_id { get; set; } = 0;
         public int? Is_pharma { get; set; } = 0;
 
         public string Folder_path { get; set; }
@@ -38,10 +37,15 @@ namespace MediConsultMobileApi.Models
 
         public ProviderData Provider { get; set; }
 
-      
+        [ForeignKey("Approval")]
+        public int? Approval_id { get; set; } = 0;
+
+        public Approval Approval { get; set; }
 
 
 
 
-    }
+
+
+}
 }
