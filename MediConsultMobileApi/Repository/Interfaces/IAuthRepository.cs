@@ -7,6 +7,8 @@ namespace MediConsultMobileApi.Repository.Interfaces
     {
         Task<MessageDto> Login(LoginUserDto userDto);
 
+        bool MemberLoginExists(int? memberId);
+
 
     }
 }

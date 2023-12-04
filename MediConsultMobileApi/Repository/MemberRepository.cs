@@ -13,20 +13,29 @@ namespace MediConsultMobileApi.Repository
         {
             this.dbContext = dbContext;
         }
-        
 
-        public async Task<bool> MemberExistsAsync(int? memberId)
+        #region MemberExist
+        public bool MemberExists(int? memberId)
         {
-            return await dbContext.Members.AnyAsync(m => m.member_id == memberId);
+            return dbContext.Members.Any(m => m.member_id == memberId);
 
         }
 
+        #endregion
+
+
+        #region GetMemberbyId
         public async Task<Member> GetByID(int id)
         {
 
             return await dbContext.Members.FirstOrDefaultAsync(m => m.member_id == id);
 
         }
+
+        #endregion
+
+
+        #region ValidationMember
         public async Task<MessageDto> validation(Member member)
         {
             var msg = new MessageDto();
@@ -62,9 +71,14 @@ namespace MediConsultMobileApi.Repository
             return msg;
         }
 
-        //public Task<ClientBranchMember> Edit(MemberDto memberDto)
-        //{
+        #endregion
 
-        //}
+        #region MemberFamily
+
+        public async Task<List<ClientBranchMember>> MemberFamily(int id)
+        {
+            return await dbContext.clientBranchMembers.Where(f=>f.member_HOF_id== id).AsNoTracking().ToListAsync();
+        }
+        #endregion
     }
 }

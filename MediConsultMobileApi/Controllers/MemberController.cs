@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace MediConsultMobileApi.Controllers
 {
@@ -13,16 +14,16 @@ namespace MediConsultMobileApi.Controllers
     public class MemberController : ControllerBase
     {
         private readonly IMemberRepository memberRepo;
-        private readonly ApplicationDbContext dbcontext;
+        
 
-        public MemberController(IMemberRepository memberRepo, ApplicationDbContext dbcontext)
+
+        public MemberController(IMemberRepository memberRepo)
         {
             this.memberRepo = memberRepo;
-            this.dbcontext = dbcontext;
+           
         }
 
-
-
+        #region MemberById
         [HttpGet("Id")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -32,9 +33,9 @@ namespace MediConsultMobileApi.Controllers
                 var member = await memberRepo.GetByID(id); // member 
                 var msg = new MessageDto();
 
-                if (member is null )
+                if (member is null)
                 {
-                return BadRequest(new MessageDto { Message ="User Not found "});
+                    return BadRequest(new MessageDto { Message = "User Not found " });
 
                 }
                 if (member.program_name is null)
@@ -61,6 +62,39 @@ namespace MediConsultMobileApi.Controllers
             return BadRequest(ModelState);
         }
 
+        #endregion
+
+        #region MemberFamily
+        [HttpGet("Family")]
+        public async Task<IActionResult> MemberFamily([Required]int memberId)
+        {
+            if (ModelState.IsValid)
+            {
+                var families = await memberRepo.MemberFamily(memberId);
+               
+                var famDto= new MemberFamilyDTO();
+                var memberExists = memberRepo.MemberExists(memberId);
+                if (!memberExists)
+                {
+                    return BadRequest(new MessageDto { Message = "Member ID Not Found " });
+                }
+                for (int i = 0; i < families.Count; i++) 
+                {
+                    famDto.MemberId = families[i].member_id;
+                    famDto.MemberGender = families[i].member_gender;
+                    famDto.MemberName = families[i].member_name;
+                    famDto.MemberBirthday = families[i].member_birthday;
+                    famDto.MemberLevel = families[i].member_level;
+                }
+                    return Ok(famDto);
+
+
+
+
+            }
+            return BadRequest(ModelState);
+        }
+        #endregion
 
     }
 }

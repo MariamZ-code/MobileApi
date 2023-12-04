@@ -23,12 +23,13 @@ namespace MediConsultMobileApi.Repository
         public Request AddRequest(RequestDTO requestDto)
         {
             var serverPath = AppDomain.CurrentDomain.BaseDirectory;
-
+            var req = new Request();
             //Request id not provider Id
-            var folder = Path.Combine(serverPath, "MemberPortalApp", requestDto.Member_id.ToString(), "Approvals", requestDto.Provider_id.ToString());
+            var folder = Path.Combine(serverPath, "MemberPortalApp", requestDto.Member_id.ToString(), "Approvals", req.ID.ToString());
 
             var request = new Request
             {
+              
                 Provider_id = requestDto.Provider_id,
                 Notes = requestDto.Notes,
                 Member_id = requestDto.Member_id,
@@ -51,12 +52,10 @@ namespace MediConsultMobileApi.Repository
         public IQueryable<Request> GetRequestsByMemberId(int memberId)
         {
 
-            var members = dbContext.Requests.Include(p => p.Provider).Where(r => r.Member_id == memberId).AsNoTracking().AsQueryable();
-
-
-
-            return members;
-
+            var requests = dbContext.Requests.Include(p => p.Provider).Where(r => r.Member_id == memberId).AsNoTracking().AsQueryable();
+            
+            return requests;
+            
 
         }
 

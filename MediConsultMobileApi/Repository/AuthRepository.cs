@@ -13,6 +13,9 @@ namespace MediConsultMobileApi.Repository
         {
             this.dbContext = dbContext;
         }
+        #region Login
+
+        #endregion
         public async Task<MessageDto> Login(LoginUserDto userDto)
         {
             var authDto = new MessageDto();
@@ -36,5 +39,14 @@ namespace MediConsultMobileApi.Repository
 
             return authDto;
         }
+
+        #region MemberExists
+        public bool MemberLoginExists(int? memberId)
+        {
+            return dbContext.logins.Any(m => m.member_id == memberId);
+
+        }
+
+        #endregion
     }
 }

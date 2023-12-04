@@ -5,6 +5,7 @@ namespace MediConsultMobileApi.DTO
 {
     public class RequestDTO
     {
+       
         public string? Notes { get; set; }
 
         [JsonIgnore]

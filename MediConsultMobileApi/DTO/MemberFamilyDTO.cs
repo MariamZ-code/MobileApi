@@ -1,0 +1,22 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MediConsultMobileApi.DTO
+{
+    public class MemberFamilyDTO
+    {
+        public int MemberId { get; set; }
+
+        [MaxLength(300)]
+        public string MemberName { get; set; }
+        [MaxLength(50)]
+
+        public string? MemberLevel { get; set; }
+        [MaxLength(50)]
+
+        public string? MemberBirthday { get; set; }
+
+        [MaxLength(50)]
+        public string MemberGender { get; set; }
+       
+    }
+}

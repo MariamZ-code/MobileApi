@@ -35,20 +35,20 @@ namespace MediConsultMobileApi.Controllers
                 var request = requestRepo.AddRequest(requestDto);
 
                 var providerExists = await providerRepo.ProviderExistsAsync(requestDto.Provider_id);
-                var memberExists = await memberRepo.MemberExistsAsync(requestDto.Member_id);
+                var memberExists =  memberRepo.MemberExists(requestDto.Member_id);
                 if (requestDto.Provider_id is null)
                 {
                     return BadRequest("Enter Provider Id");
-                }
-
-                if (requestDto.Member_id is null)
-                {
-                    return BadRequest("Enter member Id");
                 }
                 if (!providerExists)
                 {
                     return BadRequest("Provider Id not found");
                 }
+                if (requestDto.Member_id is null)
+                {
+                    return BadRequest("Enter member Id");
+                }
+               
                 if (!memberExists)
                 {
                     return BadRequest("Member Id not found");
@@ -118,21 +118,23 @@ namespace MediConsultMobileApi.Controllers
         {
             if (ModelState.IsValid)
             {
+               
                 var requests = requestRepo.GetRequestsByMemberId(memberId);
-                //var memberExist = memberRepo.MemberExistsAsync(memberId);
+                var reqDto = new RequestDetailsForMemberDTO();
+                var memberExist = memberRepo.MemberExists(memberId);
 
-                //if (!memberExist)
-                //{
-                //    return NotFound("Member Id not found");
-
-                //}
-                foreach (var request in requests)
+                if (!memberExist)
                 {
-                    if (request is null)
+                    return NotFound("Member Id not found");
+
+                }
+                    if (requests is null)
                     {
                         return NotFound("Request not found");
 
                     }
+                
+
 
                     if (datefrom is not null)
                     {
@@ -158,8 +160,17 @@ namespace MediConsultMobileApi.Controllers
                         }
                         requests = requests.Where(p => providers.Contains(p.Provider.Provider_name_en));
                     }
-                }
-                return Ok(requests);
+                    foreach (var request in requests)
+                    {
+                        reqDto = new RequestDetailsForMemberDTO
+                        {
+                            Id = request.ID,
+                            CreatedDate = request.created_date,
+                            ProviderName = request.Provider.Provider_name_en,
+                            Status = request.Status
+                        };
+                    }
+                    return Ok(requests);
             }
             return BadRequest(ModelState);
 
