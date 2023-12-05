@@ -23,9 +23,6 @@ namespace MediConsultMobileApi.Repository
         public Request AddRequest(RequestDTO requestDto)
         {
             var serverPath = AppDomain.CurrentDomain.BaseDirectory;
-            var req = new Request();
-            //Request id not provider Id
-            var folder = Path.Combine(serverPath, "MemberPortalApp", requestDto.Member_id.ToString(), "Approvals", req.ID.ToString());
 
             var request = new Request
             {
@@ -33,11 +30,16 @@ namespace MediConsultMobileApi.Repository
                 Provider_id = requestDto.Provider_id,
                 Notes = requestDto.Notes,
                 Member_id = requestDto.Member_id,
-                Folder_path = folder,
-
-
             };
+
             dbContext.Add(request);
+
+            dbContext.SaveChanges();
+
+            var folder = Path.Combine(serverPath, "MemberPortalApp", request.Member_id.ToString(), "Approvals", request.ID.ToString());
+
+            request.Folder_path = folder;
+
             dbContext.SaveChanges();
 
             return request;

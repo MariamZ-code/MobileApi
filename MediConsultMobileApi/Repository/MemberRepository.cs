@@ -80,5 +80,13 @@ namespace MediConsultMobileApi.Repository
             return await dbContext.clientBranchMembers.Where(f=>f.member_HOF_id== id).AsNoTracking().ToListAsync();
         }
         #endregion
+
+
+        #region MemberDetails
+        public async Task<ClientBranchMember> MemberDetails(int memberId)
+        {
+            return await dbContext.clientBranchMembers.FirstOrDefaultAsync(m => m.member_id == memberId); 
+        }
+        #endregion
     }
 }

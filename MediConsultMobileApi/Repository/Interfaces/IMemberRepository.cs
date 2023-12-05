@@ -12,7 +12,7 @@ namespace MediConsultMobileApi.Repository.Interfaces
 
         Task<List<ClientBranchMember>> MemberFamily(int id);
 
-
+        Task<ClientBranchMember> MemberDetails(int memberId);
 
     }
 }

@@ -106,5 +106,34 @@ namespace MediConsultMobileApi.Controllers
         }
         #endregion
 
+
+        #region MemberDetails
+        [HttpGet("MemberDetails")]
+        public async Task<IActionResult> MemberDetails([Required]int memberId)
+        {
+            if (ModelState.IsValid)
+            {
+               var member = await memberRepo.MemberDetails(memberId);
+                var memberExists = memberRepo.MemberExists(memberId);
+                if (!memberExists)
+                {
+                    return BadRequest(new MessageDto { Message = "Member ID Not Found " });
+                }
+
+                var memberDTo = new MemberDetailsDTO
+                {
+                    member_id = member.member_id,
+                    member_name = member.member_name,
+                    member_gender = member.member_gender,
+                    email = member.email,
+                    member_nid = member.member_nid,
+                    member_photo = member.member_photo,
+                    mobile = member.mobile
+                };
+                return Ok(memberDTo);
+            }
+            return BadRequest(ModelState);
+        }
+        #endregion
     }
 }
