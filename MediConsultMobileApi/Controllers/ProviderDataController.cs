@@ -19,7 +19,7 @@ namespace MediConsultMobileApi.Controllers
 
         [HttpGet]
 
-        public async Task<IActionResult> GetAll(string providerName , int startpage =1, int pageSize = 10)
+        public async Task<IActionResult> GetAll(string? providerName , int startpage =1, int pageSize = 10)
         {
             if (ModelState.IsValid)
             {

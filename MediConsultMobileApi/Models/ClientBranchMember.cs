@@ -24,6 +24,7 @@ namespace MediConsultMobileApi.Models
         [MaxLength(50)]
         public string? mobile { get; set; }
         public string member_gender { get; set; }
+        public string member_status { get; set; }
         public string? email { get; set; }
 
         [MaxLength(500)]

@@ -114,13 +114,13 @@ namespace MediConsultMobileApi.Controllers
         #region RequestByMemberId
         [HttpGet("MemberId")]
 
-        public IActionResult GetbyMemberId([Required] int memberId, string? datefrom, string? dateTo, [FromQuery] string[]? status, [FromQuery] string[]? providers)
+        public IActionResult GetbyMemberId([Required] int memberId, string? datefrom, string? dateTo, [FromQuery] string[]? status, [FromQuery] string[]? providers, int startpage = 1, int pageSize = 10)
         {
             if (ModelState.IsValid)
             {
                
                 var requests = requestRepo.GetRequestsByMemberId(memberId);
-                var reqDto = new RequestDetailsForMemberDTO();
+                var reqDto = new List<RequestDetailsForMemberDTO>();
                 var memberExist = memberRepo.MemberExists(memberId);
 
                 if (!memberExist)
@@ -160,17 +160,25 @@ namespace MediConsultMobileApi.Controllers
                         }
                         requests = requests.Where(p => providers.Contains(p.Provider.Provider_name_en));
                     }
-                    foreach (var request in requests)
+                    var totalProviders = requests.Count();
+                requests = requests.Skip((startpage - 1) * pageSize).Take(pageSize).OrderByDescending(e => e.Provider.Provider_name_en);
+                foreach (var request in requests)
                     {
-                        reqDto = new RequestDetailsForMemberDTO
-                        {
-                            Id = request.ID,
-                            CreatedDate = request.created_date,
-                            ProviderName = request.Provider.Provider_name_en,
-                            Status = request.Status
-                        };
-                    }
-                    return Ok(requests);
+                       
+                    RequestDetailsForMemberDTO reqDetalisDto = new RequestDetailsForMemberDTO
+                    {
+
+                        Id = request.ID,
+                        CreatedDate = request.created_date,
+                        ProviderName = request.Provider.Provider_name_en,
+                        Status = request.Status
+
+                    };
+                    reqDto.Add(reqDetalisDto);
+                }
+               
+
+                return Ok(reqDto);
             }
             return BadRequest(ModelState);
 

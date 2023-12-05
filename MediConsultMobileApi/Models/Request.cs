@@ -19,7 +19,7 @@ namespace MediConsultMobileApi.Models
         public string? Status { get; set; } = "Pending";
         public int? Is_pharma { get; set; } = 0;
 
-        public string Folder_path { get; set; }
+        public string? Folder_path { get; set; }
 
         [StringLength(350)]
         public string? The_email { get; set; }
@@ -40,7 +40,7 @@ namespace MediConsultMobileApi.Models
         [ForeignKey("Approval")]
         public int? Approval_id { get; set; } = 0;
 
-        public Approval Approval { get; set; }
+        //public Approval Approval { get; set; }
 
 
 

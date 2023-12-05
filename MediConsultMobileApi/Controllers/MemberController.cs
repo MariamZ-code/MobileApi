@@ -72,21 +72,31 @@ namespace MediConsultMobileApi.Controllers
             {
                 var families = await memberRepo.MemberFamily(memberId);
                
-                var famDto= new MemberFamilyDTO();
+                var famDto= new List<MemberFamilyDTO>();
                 var memberExists = memberRepo.MemberExists(memberId);
                 if (!memberExists)
                 {
                     return BadRequest(new MessageDto { Message = "Member ID Not Found " });
                 }
-                for (int i = 0; i < families.Count; i++) 
+                for (int i = 0; i < families.Count; i++)
                 {
-                    famDto.MemberId = families[i].member_id;
-                    famDto.MemberGender = families[i].member_gender;
-                    famDto.MemberName = families[i].member_name;
-                    famDto.MemberBirthday = families[i].member_birthday;
-                    famDto.MemberLevel = families[i].member_level;
+                    MemberFamilyDTO member = new MemberFamilyDTO { 
+                    
+                    MemberId = families[i].member_id,
+                    //male
+                    MemberGender = families[i].member_gender,
+                    //ahmed
+                    MemberName = families[i].member_name,
+                    //2022-03-17
+                    MemberBirthday = families[i].member_birthday,
+                    //Member
+                    MemberLevel = families[i].member_level,
+                    MemberStatus = families[i].member_status
+
+                    };
+                    famDto.Add(member);
                 }
-                    return Ok(famDto);
+                return Ok(famDto);
 
 
 
