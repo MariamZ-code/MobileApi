@@ -135,5 +135,68 @@ namespace MediConsultMobileApi.Controllers
             return BadRequest(ModelState);
         }
         #endregion
+
+
+        #region UpdateMember
+        [HttpPut]
+        public async Task<IActionResult> UpdateMember(UpdateMemberDTO memberDTO, int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await memberRepo.MemberDetails(id);
+                var memberExists = memberRepo.MemberExists(id);
+                if (!memberExists)
+                {
+                    return BadRequest(new MessageDto { Message = "Member ID Not Found " });
+                }
+
+                if (result is null)
+                {
+                    return BadRequest("Enter Member Id");
+                }
+                var nId = CreateDateAndGender(memberDTO.SSN);
+                memberRepo.UpdateMember(memberDTO, id);
+                memberRepo.SaveDatabase();
+
+                return Ok("Done");
+            }
+            return BadRequest(ModelState);
+        }
+        #endregion
+
+        #region CreateDateAndGender 
+
+        private string CreateDateAndGender(string ssn)
+        {
+
+            char[] charSSN = ssn.ToCharArray();
+            // 2   96 11 23      17017    01
+            if (!int.TryParse(ssn , out _))
+            {
+                return "National Id must be number";
+
+            }
+            if (charSSN.Length == 13)
+            {
+                
+                var gender = (charSSN[12]) % 2 == 0 ? "Female" : "Male";
+
+                var centuray = charSSN[0] == '2' ? 19 : 20;
+
+                var year = centuray + charSSN[1] + charSSN[2];
+
+                var month = charSSN[3] + charSSN[4];
+
+                var day = charSSN[5] + charSSN[6];
+
+                var date = year + "/" + month + "/" + day;
+                return date + gender ;
+            }
+            else
+                return "National Id must be 14 number";
+
+
+        }
+        #endregion
     }
 }

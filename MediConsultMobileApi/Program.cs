@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+//var txt = "_myAllowSpecificOrigins";
 builder.Services.AddScoped<IAuthRepository, AuthRepository>(); 
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IServiceRepository, SeviceRepository>();
@@ -26,7 +26,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+#region Cors
+builder.Services.AddCors(corsOptions =>
+{
+    corsOptions.AddPolicy("_myAllowSpecificOrigins", corsPolicyBuilder =>
+    {
+        corsPolicyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
 
+#endregion
 
 
 
@@ -41,6 +50,8 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+app.UseCors("_myAllowSpecificOrigins");//cors
+
 
 app.UseAuthorization();
 

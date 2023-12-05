@@ -88,5 +88,28 @@ namespace MediConsultMobileApi.Repository
             return await dbContext.clientBranchMembers.FirstOrDefaultAsync(m => m.member_id == memberId); 
         }
         #endregion
+
+        #region UpdateMember
+        public async void UpdateMember(UpdateMemberDTO memberDTO , int id)
+        {
+            var member = await MemberDetails(id);
+
+            member.email = memberDTO.Email;
+            member.mobile = memberDTO.Mobile;
+            member.member_birthday = memberDTO.Birthday;
+            member.member_nid = memberDTO.SSN;
+            member.member_photo = memberDTO.Photo;
+                
+            
+            dbContext.clientBranchMembers.Update(member);
+            
+
+        }
+        #endregion
+
+        public void SaveDatabase()
+        {
+            dbContext.SaveChanges();
+        }
     }
 }

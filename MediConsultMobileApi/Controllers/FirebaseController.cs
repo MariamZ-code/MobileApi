@@ -1,4 +1,5 @@
 ﻿using FirebaseAdmin;
+using FirebaseAdmin.Auth;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using MediConsultMobileApi.DTO;
@@ -35,6 +36,10 @@ namespace MediConsultMobileApi.Controllers
                 return NotFound(new MessageDto { Message = "notification token not found" });
             }
             List<string> tokens = new List<string>();
+            if (firebase_token.Any(x => x == null || x.firebase_token == null))
+            {
+                return NotFound(new MessageDto { Message = "Invalid or null firebase tokens found" });
+            }
             for (int i = 0; i < firebase_token.Count; i++)
             {
                 if (firebase_token[i].firebase_token is null)
@@ -51,10 +56,7 @@ namespace MediConsultMobileApi.Controllers
                 },
                 Tokens = tokens
             };
-            //var message1 = new MulticastMessage()
-            //{
 
-            //};
             var response = await FirebaseMessaging.DefaultInstance.SendMulticastAsync(message);
             return Ok(new MessageDto { Message = "notification sent successfully" });
         }
@@ -71,6 +73,7 @@ namespace MediConsultMobileApi.Controllers
                     Body = notificationMessage.Body,
                     ImageUrl = notificationMessage.ImageUrl
                 },
+                
                 Topic = "all"
             };
             var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);

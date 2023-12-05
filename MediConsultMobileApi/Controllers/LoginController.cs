@@ -14,12 +14,11 @@ namespace MediConsultMobileApi.Controllers
     public class LoginController : ControllerBase
     {
         private readonly IAuthRepository authRepo;
-        private readonly ApplicationDbContext _context;
+    
 
-        public LoginController(IAuthRepository authRepo, ApplicationDbContext _context)
+        public LoginController(IAuthRepository authRepo)
         {
             this.authRepo = authRepo;
-            this._context = _context;
         }
 
         [HttpPost("Login")]
@@ -30,6 +29,7 @@ namespace MediConsultMobileApi.Controllers
                     {
                         return BadRequest(new MessageDto { Message = "Id and Password is required " });
                     }
+
                 if (!int.TryParse(userDto.Id, out _))
                 {
                     return BadRequest(new MessageDto { Message = "Invalid Id" });
