@@ -155,6 +155,12 @@ namespace MediConsultMobileApi.Controllers
                 {
                     return BadRequest(new MessageDto { Message = "Member ID Not Found " });
                 }
+                //if (memberDTO is null)
+                //{
+                //    return BadRequest(new MessageDto { Message = "Empty Update" });
+
+
+                //}
                 if (memberDTO.Email is not null)
                 {
                     if (!validation.IsValidEmail(memberDTO.Email))
@@ -219,14 +225,16 @@ namespace MediConsultMobileApi.Controllers
                     var serverPath = AppDomain.CurrentDomain.BaseDirectory;
                     // serverPath/Member/id
                     var folder = Path.Combine(serverPath, "Members", result.member_id.ToString());
-                    memberRepo.UpdateMember(memberDTO, id);
 
 
                     foreach (var extension in validExtensions)
                     {
-                        if (memberDTO.Photo.FileName.EndsWith(extension))
+                        if (!memberDTO.Photo.FileName.EndsWith(extension))
                         {
-                            if (!Directory.Exists(folder))
+                            return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
+
+                        }
+                        if (!Directory.Exists(folder))
                             {
                                 Directory.CreateDirectory(folder);
                             }
@@ -242,18 +250,13 @@ namespace MediConsultMobileApi.Controllers
                                 await memberDTO.Photo.CopyToAsync(stream);
                             }
 
-
-                            memberRepo.SaveDatabase();
-                            return Ok(new MessageDto { Message = "Done" });
                         }
                     }
-                    return BadRequest("Folder Path must end with extension .jpg, .png, or .jpeg");
+                 memberRepo.UpdateMember(memberDTO, id);
 
-                }
-            
-            
-            
-            
+                  memberRepo.SaveDatabase();
+                 return Ok(new MessageDto { Message = "Done" });
+
             
             }
             return BadRequest(ModelState);

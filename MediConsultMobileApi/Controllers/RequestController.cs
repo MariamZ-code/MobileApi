@@ -98,10 +98,11 @@ namespace MediConsultMobileApi.Controllers
                         }
                     }
 
-                    return BadRequest("Folder Path must end with extension .pdf, .jpg, .png, or .jpeg");
+                    return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
+
                 }
 
-                return BadRequest("Please uploade File ");
+                return BadRequest(new MessageDto { Message = "Please uploade File " });
             }
             return BadRequest(ModelState);
 
