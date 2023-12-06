@@ -1,4 +1,6 @@
 
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository;
 using MediConsultMobileApi.Repository.Interfaces;
@@ -27,6 +29,15 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+string jsonKeyFilePath = "Keys/mediconsult_app_firebase_key.json";
+string fullPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, jsonKeyFilePath);
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile(fullPath),
+});
+
+
 
 #region Cors
 builder.Services.AddCors(corsOptions =>

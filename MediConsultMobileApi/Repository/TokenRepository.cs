@@ -13,20 +13,24 @@ namespace MediConsultMobileApi.Repository
         {
             this.dbContext = dbContext;
         }
-        public Login SaveToken(FirebaseTokenDTO tokenDto)
+        public void SaveToken(FirebaseTokenDTO tokenDto)
         {
-           
-                var token = new Login()
-                {
-                    member_id = tokenDto.MemberId,
-                    firebase_token = tokenDto.Firebase_token
-                };
+            var member = dbContext.logins.FirstOrDefault(x=> x.member_id== tokenDto.MemberId);
 
-                dbContext.Update(token);
+            member.member_id = tokenDto.MemberId;
+            member.firebase_token = tokenDto.Firebase_token;
+              
+
+                dbContext.Update(member);
+              
+            
+            
+        }
+
+        public void SaveChanges()
+        {
                 dbContext.SaveChanges();
-                return token;
-            
-            
+
         }
     }
 }

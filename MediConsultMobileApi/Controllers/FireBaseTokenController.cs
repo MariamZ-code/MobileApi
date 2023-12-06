@@ -41,7 +41,9 @@ namespace MediConsultMobileApi.Controllers
 
 
                 }
-                var token =  tokenRepo.SaveToken(tokenDto);
+                tokenRepo.SaveToken(tokenDto);
+                tokenRepo.SaveChanges();
+
                 return Ok(new MessageDto { Message = "Token Saved"});
             }
 
