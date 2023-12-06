@@ -1,7 +1,9 @@
-﻿using MediConsultMobileApi.DTO;
+﻿using Azure.Core;
+using MediConsultMobileApi.DTO;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace MediConsultMobileApi.Repository
 {
@@ -23,7 +25,6 @@ namespace MediConsultMobileApi.Repository
 
         #endregion
 
-
         #region GetMemberbyId
         public async Task<Member> GetByID(int id)
         {
@@ -33,7 +34,6 @@ namespace MediConsultMobileApi.Repository
         }
 
         #endregion
-
 
         #region ValidationMember
         public async Task<MessageDto> validation(Member member)
@@ -81,7 +81,6 @@ namespace MediConsultMobileApi.Repository
         }
         #endregion
 
-
         #region MemberDetails
         public async Task<ClientBranchMember> MemberDetails(int memberId)
         {
@@ -92,13 +91,22 @@ namespace MediConsultMobileApi.Repository
         #region UpdateMember
         public async void UpdateMember(UpdateMemberDTO memberDTO , int id)
         {
+            var serverPath = AppDomain.CurrentDomain.BaseDirectory;
             var member = await MemberDetails(id);
-
             member.email = memberDTO.Email;
             member.mobile = memberDTO.Mobile;
-            member.member_birthday = memberDTO.Birthday;
             member.member_nid = memberDTO.SSN;
-            member.member_photo = memberDTO.Photo;
+
+            var folder = Path.Combine(serverPath, "Members", member.member_id.ToString());
+
+            if (memberDTO.SSN is not null)
+            {
+                var (date, gender) = CreateDateAndGender(memberDTO.SSN);
+
+                member.member_birthday = date ;
+                member.member_gender = gender;
+            }
+            member.member_photo =folder;
                 
             
             dbContext.clientBranchMembers.Update(member);
@@ -107,9 +115,46 @@ namespace MediConsultMobileApi.Repository
         }
         #endregion
 
+        #region CreateDateAndGender 
+
+        private (string date, string gender) CreateDateAndGender(string ssn)
+        {
+
+            char[] charSSN = ssn.ToCharArray();
+       
+
+                var gender = (charSSN[12]) % 2 == 0 ? "Female" : "Male";
+
+                var centuray = charSSN[0] == '2' ? "19" : "20";
+
+                var year = centuray + charSSN[1] + charSSN[2];
+
+                var month = $"{charSSN[3]}{charSSN[4]}";
+
+                var day = $"{charSSN[5]}{charSSN[6]}";
+
+                var date = day  + "-" + month + "-" + year;
+                return (date , gender);
+        
+
+
+        }
+        #endregion
+
         public void SaveDatabase()
         {
             dbContext.SaveChanges();
+        }
+        public bool SSNExists(string nId)
+        {
+            return dbContext.clientBranchMembers.Any(m => m.member_nid == nId);
+
+        }
+
+        public bool PhoneExists(string mobile)
+        {
+            return dbContext.clientBranchMembers.Any(m => m.mobile == mobile);
+
         }
     }
 }

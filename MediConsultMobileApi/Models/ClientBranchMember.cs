@@ -22,6 +22,7 @@ namespace MediConsultMobileApi.Models
         public string? member_birthday { get; set; }
 
         [MaxLength(50)]
+        [RegularExpression(@"^01[1235][0-9]{8}$", ErrorMessage = "Invalid phone number, please enter valid phone number")]
         public string? mobile { get; set; }
         public string member_gender { get; set; }
         public string member_status { get; set; }

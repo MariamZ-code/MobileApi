@@ -1,11 +1,14 @@
-﻿using MediConsultMobileApi.DTO;
+﻿using Azure.Core;
+using MediConsultMobileApi.DTO;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
+using MediConsultMobileApi.Validations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Net.Mail;
 
 namespace MediConsultMobileApi.Controllers
 {
@@ -14,13 +17,12 @@ namespace MediConsultMobileApi.Controllers
     public class MemberController : ControllerBase
     {
         private readonly IMemberRepository memberRepo;
-        
+        private readonly IValidation validation;
 
-
-        public MemberController(IMemberRepository memberRepo)
+        public MemberController(IMemberRepository memberRepo , IValidation validation)
         {
             this.memberRepo = memberRepo;
-           
+            this.validation = validation;
         }
 
         #region MemberById
@@ -139,64 +141,124 @@ namespace MediConsultMobileApi.Controllers
 
         #region UpdateMember
         [HttpPut]
-        public async Task<IActionResult> UpdateMember(UpdateMemberDTO memberDTO, int id)
+        public async Task<IActionResult> UpdateMember([FromForm]UpdateMemberDTO memberDTO,[Required] int id)
         {
             if (ModelState.IsValid)
             {
                 var result = await memberRepo.MemberDetails(id);
                 var memberExists = memberRepo.MemberExists(id);
+
+                string[] validExtensions = {".jpg", ".jpeg", ".png" };
+                const long maxSizeBytes = 5 * 1024 * 1024;
+
                 if (!memberExists)
                 {
                     return BadRequest(new MessageDto { Message = "Member ID Not Found " });
                 }
-
-                if (result is null)
+                if (memberDTO.Email is not null)
                 {
-                    return BadRequest("Enter Member Id");
+                    if (!validation.IsValidEmail(memberDTO.Email))
+                    {
+                        return BadRequest(new MessageDto { Message = "Email is not valid." });
+                    }
                 }
-                var nId = CreateDateAndGender(memberDTO.SSN);
-                memberRepo.UpdateMember(memberDTO, id);
-                memberRepo.SaveDatabase();
 
-                return Ok("Done");
+                if (memberDTO.Mobile is not null)
+                {
+                    if (!long.TryParse(memberDTO.Mobile, out _))
+                    {
+                        return BadRequest(new MessageDto { Message = "Mobile must be number" });
+
+                    }
+                    if (!memberDTO.Mobile.StartsWith("01"))
+                    {
+                        return BadRequest(new MessageDto { Message = "Mobile Number must start with 01" });
+                    }
+                    if (memberDTO.Mobile.Length != 11)
+                    {
+                        return BadRequest(new MessageDto { Message = "Mobile Number must be 11 number" });
+                    }
+                    if (memberRepo.PhoneExists(memberDTO.Mobile))
+                    {
+                        return BadRequest(new MessageDto { Message = "Mobile number already Exists" });
+                    }
+
+                }
+
+                if (memberDTO.SSN is not null)
+                {
+
+                    if (!long.TryParse(memberDTO.SSN, out _))
+                    {
+                        return BadRequest(new MessageDto { Message = "National Id must be number" });
+
+                    }
+                    if (memberDTO.SSN.Length != 14)
+                    {
+                        return BadRequest(new MessageDto { Message = "National Id must be 14 number" });
+
+                    }
+                    if (memberRepo.SSNExists(memberDTO.SSN))
+                    {
+                        return BadRequest(new MessageDto { Message = "National Id already Exists" });
+                    }
+                }
+
+
+                if (memberDTO.Photo is not null)
+                {
+
+                    if (memberDTO.Photo is null || memberDTO.Photo.Length == 0)
+                    {
+                        return BadRequest("No file uploaded.");
+                    }
+                    if (memberDTO.Photo.Length > maxSizeBytes)
+                    {
+                        return BadRequest($"File size must be less than 5 MB.");
+                    }
+                    var serverPath = AppDomain.CurrentDomain.BaseDirectory;
+                    // serverPath/Member/id
+                    var folder = Path.Combine(serverPath, "Members", result.member_id.ToString());
+                    memberRepo.UpdateMember(memberDTO, id);
+
+
+                    foreach (var extension in validExtensions)
+                    {
+                        if (memberDTO.Photo.FileName.EndsWith(extension))
+                        {
+                            if (!Directory.Exists(folder))
+                            {
+                                Directory.CreateDirectory(folder);
+                            }
+
+
+                            string uniqueFileName = Guid.NewGuid().ToString() + "_" + memberDTO.Photo.FileName;
+
+                            string filePath = Path.Combine(folder, uniqueFileName);
+
+
+                            using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await memberDTO.Photo.CopyToAsync(stream);
+                            }
+
+
+                            memberRepo.SaveDatabase();
+                            return Ok(new MessageDto { Message = "Done" });
+                        }
+                    }
+                    return BadRequest("Folder Path must end with extension .jpg, .png, or .jpeg");
+
+                }
+            
+            
+            
+            
+            
             }
             return BadRequest(ModelState);
         }
         #endregion
 
-        #region CreateDateAndGender 
-
-        private string CreateDateAndGender(string ssn)
-        {
-
-            char[] charSSN = ssn.ToCharArray();
-            // 2   96 11 23      17017    01
-            if (!int.TryParse(ssn , out _))
-            {
-                return "National Id must be number";
-
-            }
-            if (charSSN.Length == 13)
-            {
-                
-                var gender = (charSSN[12]) % 2 == 0 ? "Female" : "Male";
-
-                var centuray = charSSN[0] == '2' ? 19 : 20;
-
-                var year = centuray + charSSN[1] + charSSN[2];
-
-                var month = charSSN[3] + charSSN[4];
-
-                var day = charSSN[5] + charSSN[6];
-
-                var date = year + "/" + month + "/" + day;
-                return date + gender ;
-            }
-            else
-                return "National Id must be 14 number";
-
-
-        }
-        #endregion
     }
 }

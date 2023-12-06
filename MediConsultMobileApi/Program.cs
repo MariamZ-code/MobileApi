@@ -2,6 +2,7 @@
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository;
 using MediConsultMobileApi.Repository.Interfaces;
+using MediConsultMobileApi.Validations;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@ builder.Services.AddScoped<IProviderDataRepository , ProviderDataRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 builder.Services.AddScoped<IMedicalNetworkRepository , MedicalNetworkRepository>();
 builder.Services.AddScoped<ITokenRepository , TokenRepository>();
+builder.Services.AddScoped<IValidation, Validation>();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("cs")));
 
 

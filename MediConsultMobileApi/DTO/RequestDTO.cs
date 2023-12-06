@@ -10,7 +10,7 @@ namespace MediConsultMobileApi.DTO
 
         [JsonIgnore]
 
-        public string? Folderpath { get; set; }
+        public IFormFile? Folderpath { get; set; }
 
         public int? Provider_id { get; set; }
 
