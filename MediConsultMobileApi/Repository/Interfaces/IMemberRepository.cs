@@ -8,6 +8,9 @@ namespace MediConsultMobileApi.Repository.Interfaces
         bool MemberExists(int? memberId);
         bool SSNExists(string nId);
         bool PhoneExists(string mobile);
+        ClientBranchMember GetMemberByMobile(string mobile);
+        ClientBranchMember GetMemberByEmail(string email);
+        ClientBranchMember GetMemberByNationalId(string nId);
         Task<MessageDto> validation(Member member);
         Task<Member> GetByID(int id);
 

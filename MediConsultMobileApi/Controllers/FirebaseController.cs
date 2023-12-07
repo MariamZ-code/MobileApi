@@ -22,63 +22,6 @@ namespace MediConsultMobileApi.Controllers
 
             this.dbContext = dbContext;
         }
-        //[Route("SendNotification")]
-        //[HttpPost]
-        //public async Task<IActionResult> SendNotification([Required][FromBody] NotificationMessage notificationMessage)
-        //{
-        //    var firebase_token = await dbContext.logins.Where(x => notificationMessage.membersIds.Contains(x.member_id.ToString())).ToListAsync();
-        //    if (firebase_token is null)
-        //    {
-        //        return NotFound(new MessageDto { Message = "member not found" });
-        //    }
-        //    if (firebase_token.Count == 0)
-        //    {
-        //        return NotFound(new MessageDto { Message = "notification token not found" });
-        //    }
-
-        //    List<string> tokens = new List<string>();
-        //    if (firebase_token.Any(x => x == null || x.firebase_token == null))
-        //    {
-        //        return NotFound(new MessageDto { Message = "Invalid or null firebase tokens found" });
-        //    }
-        //    for (int i = 0; i < firebase_token.Count; i++)
-        //    {
-        //        if (firebase_token[i] != null && firebase_token[i].firebase_token != null)
-        //        {
-        //            tokens.Add(firebase_token[i].firebase_token);
-        //        }
-        //    }
-        //    //for (int i = 0; i < firebase_token.Count; i++)
-        //    //{
-        //    //    if (firebase_token[i].firebase_token is null)
-        //    //        continue;
-        //    //    tokens.Add(firebase_token[i].firebase_token);
-        //    //}
-        //    if (firebase_token == null || firebase_token.Count == 0)
-        //    {
-        //        return NotFound(new MessageDto { Message = "No matching members found" });
-        //    }
-        //    if (dbContext.logins == null)
-        //    {
-        //        return BadRequest(new MessageDto { Message = "Database context is not initialized" });
-        //    }
-        //    var message = new MulticastMessage()
-        //    {
-        //        Notification = new Notification
-        //        {
-        //            Title = notificationMessage.Title,
-        //            Body = notificationMessage.Body,
-        //            ImageUrl = notificationMessage.ImageUrl
-        //        },
-        //        Tokens = tokens
-        //    };
-
-        //    var response = await FirebaseMessaging.DefaultInstance.SendMulticastAsync(message);
-        //    return Ok(new MessageDto { Message = "notification sent successfully" });
-        //}
-
-
-
 
         [HttpPost("SendNotification")]
         public async Task<IActionResult> SendNotification([FromBody] NotificationMessage notificationMessage)
@@ -100,7 +43,7 @@ namespace MediConsultMobileApi.Controllers
                 return NotFound(new MessageDto { Message = "No valid tokens found for the specified members" });
             }
 
-            if (notificationMessage.ImageUrl is null)
+            if (notificationMessage.ImageUrl == string.Empty)
             {
                 var message = new MulticastMessage
                 {
@@ -154,7 +97,7 @@ namespace MediConsultMobileApi.Controllers
         public async Task<IActionResult> SendNotificationToAll([Required][FromBody] NotificationMessageToAll notificationMessage)
         {
 
-            if (notificationMessage.ImageUrl is null)
+            if (notificationMessage.ImageUrl == string.Empty)
             {
                 var message = new Message
                 {
@@ -162,7 +105,7 @@ namespace MediConsultMobileApi.Controllers
                     {
                         Title = notificationMessage.Title,
                         Body = notificationMessage.Body,
-                        //ImageUrl = notificationMessage.ImageUrl
+                        
                     },
                     Topic = "all"
                 };

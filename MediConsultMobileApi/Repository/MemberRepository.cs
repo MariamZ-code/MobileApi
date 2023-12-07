@@ -3,6 +3,7 @@ using MediConsultMobileApi.DTO;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using System.Security.Cryptography;
 
 namespace MediConsultMobileApi.Repository
@@ -153,7 +154,24 @@ namespace MediConsultMobileApi.Repository
 
         public bool PhoneExists(string mobile)
         {
+
             return dbContext.clientBranchMembers.Any(m => m.mobile == mobile);
+
+        }
+
+        public ClientBranchMember GetMemberByMobile(string mobile)
+        {
+            return dbContext.clientBranchMembers.FirstOrDefault(m=> m.mobile == mobile);
+        }
+
+        public ClientBranchMember GetMemberByEmail(string email)
+        {
+            return dbContext.clientBranchMembers.FirstOrDefault(m => m.email == email);
+
+        }
+        public ClientBranchMember GetMemberByNationalId(string nId)
+        {
+            return dbContext.clientBranchMembers.FirstOrDefault(m => m.member_nid == nId);
 
         }
     }

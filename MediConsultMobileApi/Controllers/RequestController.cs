@@ -3,7 +3,10 @@ using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using System.Linq;
 
 namespace MediConsultMobileApi.Controllers
 {
@@ -14,16 +17,107 @@ namespace MediConsultMobileApi.Controllers
         private readonly IRequestRepository requestRepo;
         private readonly IProviderDataRepository providerRepo;
         private readonly IMemberRepository memberRepo;
+        private readonly ApplicationDbContext dbContext;
 
-        public RequestController(IRequestRepository requestRepo , IProviderDataRepository providerRepo ,IMemberRepository memberRepo)
+        public RequestController(IRequestRepository requestRepo, IProviderDataRepository providerRepo, IMemberRepository memberRepo , ApplicationDbContext dbContext)
         {
             this.requestRepo = requestRepo;
             this.providerRepo = providerRepo;
             this.memberRepo = memberRepo;
+            this.dbContext = dbContext;
         }
 
         #region AddNewRequest
         [HttpPost]
+
+        //public async Task<IActionResult> PostRequest([FromForm] RequestDTO requestDto, [FromForm] List<IFormFile> files)
+        //{
+        //    string[] validExtensions = { ".pdf", ".jpg", ".jpeg", ".png" };
+        //    const long maxSizeBytes = 5 * 1024 * 1024;
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        var request = requestRepo.AddRequest(requestDto);
+
+        //        var providerExists = await providerRepo.ProviderExistsAsync(requestDto.Provider_id);
+        //        var memberExists = memberRepo.MemberExists(requestDto.Member_id);
+
+        //        if (requestDto.Provider_id is null)
+        //        {
+        //            return BadRequest(new MessageDto { Message = "Enter Provider Id" });
+        //        }
+
+        //        if (!providerExists)
+        //        {
+        //            return BadRequest(new MessageDto { Message = "Provider Id not found" });
+        //        }
+
+        //        if (requestDto.Member_id is null)
+        //        {
+        //            return BadRequest(new MessageDto { Message = "Enter member Id" });
+        //        }
+
+        //        if (!memberExists)
+        //        {
+        //            return BadRequest(new MessageDto { Message = "Member Id not found" });
+        //        }
+
+
+
+        //        // Flag to track if all files have valid extensions
+        //        bool allFilesValid = true;
+
+        //        for (int i = 0; i < files.Count; i++)
+        //        {
+        //            if (files[i] is null || files[i].Length == 0)
+        //            {
+        //                return BadRequest("No file uploaded.");
+        //            }
+
+        //            if (files[i].Length > maxSizeBytes)
+        //            {
+        //                return BadRequest($"File size must be less than 5 MB.");
+        //            }
+        //            var serverPath = AppDomain.CurrentDomain.BaseDirectory;
+        //            var folder = Path.Combine(serverPath, "MemberPortalApp", requestDto.Member_id.ToString(), "Approvals", request.ID.ToString());
+
+        //            if (!Directory.Exists(folder))
+        //            {
+        //                Directory.CreateDirectory(folder);
+        //            }
+        //            bool isValidExtension = validExtensions.Any(extension => files[i].FileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase));
+
+        //            if (!isValidExtension)
+        //            {
+        //                allFilesValid = false;
+        //                break;
+        //            }
+
+        //            string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(files[i].FileName);
+
+        //            string filePath = Path.Combine(folder, uniqueFileName);
+
+        //            using (FileStream stream = new FileStream(filePath, FileMode.Create))
+        //            {
+        //                await files[i].CopyToAsync(stream);
+        //            }
+        //        }
+
+        //        // Check if all files have valid extensions before returning the result
+        //        if (allFilesValid)
+        //        {
+        //            return Ok(request);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest(new MessageDto { Message = "All files must have valid extensions (.jpg, .png, .jpeg, .pdf)." });
+        //        }
+
+        //    }
+
+        //    return BadRequest(ModelState);
+        //}
+
 
         public async Task<IActionResult> PostRequest([FromForm] RequestDTO requestDto, [FromForm] List<IFormFile> files)
         {
@@ -32,28 +126,33 @@ namespace MediConsultMobileApi.Controllers
             const long maxSizeBytes = 5 * 1024 * 1024;
             if (ModelState.IsValid)
             {
-                var request = requestRepo.AddRequest(requestDto);
 
                 var providerExists = await providerRepo.ProviderExistsAsync(requestDto.Provider_id);
-                var memberExists =  memberRepo.MemberExists(requestDto.Member_id);
+                var memberExists = memberRepo.MemberExists(requestDto.Member_id);
                 if (requestDto.Provider_id is null)
                 {
-                    return BadRequest("Enter Provider Id");
+                    return BadRequest(new MessageDto { Message = "Enter Provider Id" });
                 }
                 if (!providerExists)
                 {
-                    return BadRequest("Provider Id not found");
+                    return BadRequest(new MessageDto { Message = "Provider Id not found" });
                 }
                 if (requestDto.Member_id is null)
                 {
-                    return BadRequest("Enter member Id");
+                    return BadRequest(new MessageDto { Message = "Enter member Id" });
                 }
-               
+
                 if (!memberExists)
                 {
-                    return BadRequest("Member Id not found");
+                    return BadRequest(new MessageDto { Message = "Member Id not found" });
 
                 }
+                var request = requestRepo.AddRequest(requestDto);
+
+                var serverPath = AppDomain.CurrentDomain.BaseDirectory;
+                var folder = Path.Combine(serverPath, "MemberPortalApp", requestDto.Member_id.ToString(), "Approvals", request.ID.ToString());
+
+               
 
                 for (int i = 0; i < files.Count; i++)
                 {
@@ -68,12 +167,6 @@ namespace MediConsultMobileApi.Controllers
                     }
 
 
-
-
-                    var serverPath = AppDomain.CurrentDomain.BaseDirectory;
-                    var folder = Path.Combine(serverPath, "MemberPortalApp", requestDto.Member_id.ToString(), "Approvals", request.ID.ToString());
-
-
                     foreach (var extension in validExtensions)
                     {
                         if (files[i].FileName.EndsWith(extension))
@@ -82,8 +175,6 @@ namespace MediConsultMobileApi.Controllers
                             {
                                 Directory.CreateDirectory(folder);
                             }
-
-
                             string uniqueFileName = Guid.NewGuid().ToString() + "_" + files[i].FileName;
 
                             string filePath = Path.Combine(folder, uniqueFileName);
@@ -94,18 +185,22 @@ namespace MediConsultMobileApi.Controllers
                                 await files[i].CopyToAsync(stream);
                             }
 
-                            return Ok(request);
                         }
+                        else
+                        {
+                             return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
+
+                        }
+                       
                     }
 
-                    return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
 
+                    return Ok(request);
                 }
 
                 return BadRequest(new MessageDto { Message = "Please uploade File " });
             }
             return BadRequest(ModelState);
-
 
 
         }
@@ -115,57 +210,72 @@ namespace MediConsultMobileApi.Controllers
         #region RequestByMemberId
         [HttpGet("MemberId")]
 
-        public IActionResult GetbyMemberId([Required] int memberId, string? datefrom, string? dateTo, [FromQuery] string[]? status, [FromQuery] string[]? providers, int startpage = 1, int pageSize = 10)
+
+        //.Where(e => e.Date >=startDate && e.Date <=endDate && e.Employee.Name==name).ToList(); 
+        public IActionResult GetbyMemberId([Required] int memberId, [FromQuery] string? startDate, [FromQuery] string? endDate, [FromQuery] string[]? status, [FromQuery] string[]? providers, [FromQuery] int startpage = 1, [FromQuery] int pageSize = 10)
         {
             if (ModelState.IsValid)
             {
-               
+
                 var requests = requestRepo.GetRequestsByMemberId(memberId);
                 var reqDto = new List<RequestDetailsForMemberDTO>();
                 var memberExist = memberRepo.MemberExists(memberId);
 
                 if (!memberExist)
                 {
-                    return NotFound("Member Id not found");
+                    return NotFound(new MessageDto { Message = "Member Id not found" });
 
                 }
-                    if (requests is null)
-                    {
-                        return NotFound("Request not found");
+                if (requests is null)
+                {
+                    return NotFound(new MessageDto { Message = "Request not found" });
 
-                    }
-                
+                }
 
+             
+                //if (startDate is not null)
+                //{
+                //    requests = requests.Where(x => x.created_date.Contains(startDate));
+                //}
+                //if (endDate is not null)
+                //{
+                //    requests = requests.Where(x => x.created_date.Contains(endDate));
+                //}
+                if (status != null && status.Any())
+                {
+                    for (int i = 0; i < status.Length; i++)
+                    {
+                        var sta = status[i];
+                    }
+                    requests = requests.Where(c => status.Contains(c.Status));
+                }
+                if (providers != null && providers.Any())
+                {
+                    for (int i = 0; i < providers.Length; i++)
+                    {
+                        var provider = providers[i]; 
+                    }
+                    requests = requests.Where(p => providers.Contains(p.Provider.Provider_name_en));
+                }
+                if (endDate is not null || startDate is not null)
+                {
 
-                    if (datefrom is not null)
-                    {
-                        requests = requests.Where(x => x.created_date.Contains(datefrom));
-                    }
-                    if (dateTo is not null)
-                    {
-                        requests = requests.Where(x => x.created_date.Contains(dateTo));
-                    }
-                    if (status != null && status.Any())
-                    {
-                        for (int i = 0; i < status.Length; i++)
-                        {
-                            var sta = status[i];
-                        }
-                        requests = requests.Where(c => status.Contains(c.Status));
-                    }
-                    if (providers != null && providers.Any())
-                    {
-                        for (int i = 0; i < providers.Length; i++)
-                        {
-                            var provider = providers[i];
-                        }
-                        requests = requests.Where(p => providers.Contains(p.Provider.Provider_name_en));
-                    }
-                    var totalProviders = requests.Count();
+                    DateTime startDat = DateTime.ParseExact(startDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                    DateTime endDat = DateTime.ParseExact(endDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+                    requests = requests
+                         .AsEnumerable().Where(entity =>
+                               DateTime.TryParseExact(entity.created_date, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var entityDate) &&
+                               entityDate >= startDat &&
+                               entityDate <= endDat)
+                        .AsQueryable();
+                }
+                var totalProviders = requests.Count();
                 requests = requests.Skip((startpage - 1) * pageSize).Take(pageSize).OrderByDescending(e => e.Provider.Provider_name_en);
                 foreach (var request in requests)
-                    {
-                       
+                {
+                   
+
                     RequestDetailsForMemberDTO reqDetalisDto = new RequestDetailsForMemberDTO
                     {
 
@@ -175,11 +285,22 @@ namespace MediConsultMobileApi.Controllers
                         Status = request.Status
 
                     };
+
                     reqDto.Add(reqDetalisDto);
                 }
-               
 
-                return Ok(reqDto);
+                var medicalDto = new
+                {
+
+                    TotalCount = totalProviders,
+                    PageNumber = startpage,
+                    PageSize = pageSize,
+                    Requests = reqDto,
+
+
+                };
+
+                return Ok(medicalDto);
             }
             return BadRequest(ModelState);
 
@@ -190,7 +311,7 @@ namespace MediConsultMobileApi.Controllers
         #region RequestByRequestId
         [HttpGet("RequestId")]
 
-        public async Task<IActionResult> GetResultByID([Required]int id)
+        public async Task<IActionResult> GetResultByID([Required] int id)
         {
             if (ModelState.IsValid)
             {

@@ -19,7 +19,7 @@ namespace MediConsultMobileApi.Controllers
         private readonly IMemberRepository memberRepo;
         private readonly IValidation validation;
 
-        public MemberController(IMemberRepository memberRepo , IValidation validation)
+        public MemberController(IMemberRepository memberRepo, IValidation validation)
         {
             this.memberRepo = memberRepo;
             this.validation = validation;
@@ -68,13 +68,13 @@ namespace MediConsultMobileApi.Controllers
 
         #region MemberFamily
         [HttpGet("Family")]
-        public async Task<IActionResult> MemberFamily([Required]int memberId)
+        public async Task<IActionResult> MemberFamily([Required] int memberId)
         {
             if (ModelState.IsValid)
             {
                 var families = await memberRepo.MemberFamily(memberId);
-               
-                var famDto= new List<MemberFamilyDTO>();
+
+                var famDto = new List<MemberFamilyDTO>();
                 var memberExists = memberRepo.MemberExists(memberId);
                 if (!memberExists)
                 {
@@ -82,18 +82,19 @@ namespace MediConsultMobileApi.Controllers
                 }
                 for (int i = 0; i < families.Count; i++)
                 {
-                    MemberFamilyDTO member = new MemberFamilyDTO { 
-                    
-                    MemberId = families[i].member_id,
-                    //male
-                    MemberGender = families[i].member_gender,
-                    //ahmed
-                    MemberName = families[i].member_name,
-                    //2022-03-17
-                    MemberBirthday = families[i].member_birthday,
-                    //Member
-                    MemberLevel = families[i].member_level,
-                    MemberStatus = families[i].member_status
+                    MemberFamilyDTO member = new MemberFamilyDTO
+                    {
+
+                        MemberId = families[i].member_id,
+                        //male
+                        MemberGender = families[i].member_gender,
+                        //ahmed
+                        MemberName = families[i].member_name,
+                        //2022-03-17
+                        MemberBirthday = families[i].member_birthday,
+                        //Member
+                        MemberLevel = families[i].member_level,
+                        MemberStatus = families[i].member_status
 
                     };
                     famDto.Add(member);
@@ -111,11 +112,11 @@ namespace MediConsultMobileApi.Controllers
 
         #region MemberDetails
         [HttpGet("MemberDetails")]
-        public async Task<IActionResult> MemberDetails([Required]int memberId)
+        public async Task<IActionResult> MemberDetails([Required] int memberId)
         {
             if (ModelState.IsValid)
             {
-               var member = await memberRepo.MemberDetails(memberId);
+                var member = await memberRepo.MemberDetails(memberId);
                 var memberExists = memberRepo.MemberExists(memberId);
                 if (!memberExists)
                 {
@@ -141,32 +142,37 @@ namespace MediConsultMobileApi.Controllers
 
         #region UpdateMember
         [HttpPut]
-        public async Task<IActionResult> UpdateMember([FromForm]UpdateMemberDTO memberDTO,[Required] int id)
+        public async Task<IActionResult> UpdateMember([FromForm] UpdateMemberDTO memberDTO, [Required] int id)
         {
             if (ModelState.IsValid)
             {
                 var result = await memberRepo.MemberDetails(id);
                 var memberExists = memberRepo.MemberExists(id);
 
-                string[] validExtensions = {".jpg", ".jpeg", ".png" };
+                string[] validExtensions = { ".jpg", ".jpeg", ".png" };
                 const long maxSizeBytes = 5 * 1024 * 1024;
 
                 if (!memberExists)
                 {
                     return BadRequest(new MessageDto { Message = "Member ID Not Found " });
                 }
-                //if (memberDTO is null)
-                //{
-                //    return BadRequest(new MessageDto { Message = "Empty Update" });
+                var existingMemberWithSameMobile =  memberRepo.GetMemberByMobile(memberDTO.Mobile);
+                var existingMemberWithSameEmail =  memberRepo.GetMemberByEmail(memberDTO.Email);
+                var existingMemberWithSameNationalId =  memberRepo.GetMemberByNationalId(memberDTO.SSN);
 
 
-                //}
                 if (memberDTO.Email is not null)
                 {
+
+                    if (existingMemberWithSameEmail != null && existingMemberWithSameEmail.member_id != id)
+                    {
+                        return BadRequest(new MessageDto { Message = "Email already exists for another member." });
+                    }
                     if (!validation.IsValidEmail(memberDTO.Email))
                     {
                         return BadRequest(new MessageDto { Message = "Email is not valid." });
                     }
+
                 }
 
                 if (memberDTO.Mobile is not null)
@@ -184,12 +190,21 @@ namespace MediConsultMobileApi.Controllers
                     {
                         return BadRequest(new MessageDto { Message = "Mobile Number must be 11 number" });
                     }
-                    if (memberRepo.PhoneExists(memberDTO.Mobile))
+
+                    if (existingMemberWithSameMobile != null && existingMemberWithSameMobile.member_id != id)
                     {
-                        return BadRequest(new MessageDto { Message = "Mobile number already Exists" });
+                        return BadRequest(new MessageDto { Message = "Mobile number already exists for another member." });
                     }
+                    //if (memberRepo.PhoneExists(memberDTO.Mobile))
+                    //{
+                    //    return BadRequest(new MessageDto { Message = "Mobile number already Exists" });
+
+                    //}
+
 
                 }
+
+
 
                 if (memberDTO.SSN is not null)
                 {
@@ -204,9 +219,9 @@ namespace MediConsultMobileApi.Controllers
                         return BadRequest(new MessageDto { Message = "National Id must be 14 number" });
 
                     }
-                    if (memberRepo.SSNExists(memberDTO.SSN))
+                    if (existingMemberWithSameNationalId != null && existingMemberWithSameNationalId.member_id != id)
                     {
-                        return BadRequest(new MessageDto { Message = "National Id already Exists" });
+                        return BadRequest(new MessageDto { Message = "National Id already exists for another member." });
                     }
                 }
 
@@ -235,29 +250,29 @@ namespace MediConsultMobileApi.Controllers
 
                         }
                         if (!Directory.Exists(folder))
-                            {
-                                Directory.CreateDirectory(folder);
-                            }
-
-
-                            string uniqueFileName = Guid.NewGuid().ToString() + "_" + memberDTO.Photo.FileName;
-
-                            string filePath = Path.Combine(folder, uniqueFileName);
-
-
-                            using (FileStream stream = new FileStream(filePath, FileMode.Create))
-                            {
-                                await memberDTO.Photo.CopyToAsync(stream);
-                            }
-
+                        {
+                            Directory.CreateDirectory(folder);
                         }
+
+
+                        string uniqueFileName = Guid.NewGuid().ToString() + "_" + memberDTO.Photo.FileName;
+
+                        string filePath = Path.Combine(folder, uniqueFileName);
+
+
+                        using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await memberDTO.Photo.CopyToAsync(stream);
+                        }
+
                     }
-                 memberRepo.UpdateMember(memberDTO, id);
+                }
+                memberRepo.UpdateMember(memberDTO, id);
 
-                  memberRepo.SaveDatabase();
-                 return Ok(new MessageDto { Message = "Done" });
+                memberRepo.SaveDatabase();
+                return Ok(new MessageDto { Message = "Done" });
 
-            
+
             }
             return BadRequest(ModelState);
         }
