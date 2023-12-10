@@ -2,6 +2,9 @@
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
+using System.Net.Mail;
+using System.Net;
 
 namespace MediConsultMobileApi.Repository
 {
@@ -48,5 +51,7 @@ namespace MediConsultMobileApi.Repository
         }
 
         #endregion
-    }
+
+
+}
 }

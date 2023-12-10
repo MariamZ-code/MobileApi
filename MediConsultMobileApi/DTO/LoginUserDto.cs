@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace MediConsultMobileApi.DTO
 {
@@ -10,7 +11,8 @@ namespace MediConsultMobileApi.DTO
 
         public string Password { get; set; }
 
-        public string Firebase_token { get; set; }
+        [JsonIgnore]
+        public string? Firebase_token { get; set; }
 
     }
 }

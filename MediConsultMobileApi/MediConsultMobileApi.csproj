@@ -20,6 +20,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <PackageReference Include="System.Net.Mail.Abstractions" Version="1.1.21" />
+    <PackageReference Include="Twilio" Version="6.15.2" />
   </ItemGroup>
 
 </Project>
