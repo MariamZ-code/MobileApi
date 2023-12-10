@@ -14,8 +14,11 @@ namespace MediConsultMobileApi.Models
         public string? program_name { get; set; }
         public string? member_photo { get; set; }
         public string member_status { get; set; }
+
+        // TODO : Add Column to DB
         public string? mobile { get; set; }
 
+        // TODO : Add Column to DB
         public string? email { get; set; }
 
         public int? program_id { get; set; }
