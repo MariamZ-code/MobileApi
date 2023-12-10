@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace MediConsultMobileApi.Models
 {
@@ -18,6 +19,11 @@ namespace MediConsultMobileApi.Models
 
         // TODO : Add Column to DB
         public string? firebase_token { get; set; }
+
+        //[JsonIgnore]
+        //public string? Otp { get; set; }
+
+
 
     }
 

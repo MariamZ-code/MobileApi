@@ -9,6 +9,8 @@ namespace MediConsultMobileApi.Repository.Interfaces
 
         bool MemberLoginExists(int? memberId);
 
+        Login ResetPassword(int memberId);
+
 
     }
 }

@@ -26,11 +26,12 @@ namespace MediConsultMobileApi.Models
         public DbSet<Member_services_with_copayments> member_Services_With_Copayments { get; set; }
         public DbSet<Login> logins { get; set; }
         public DbSet<MedicalNetwork> medicalNetworks { get; set; }
-        public DbSet<ProviderCategory> providerCategories { get; set; }
+   
         public DbSet<ProviderData> Providers { get; set; }
         public DbSet<Request> Requests { get; set; }
         public DbSet<ClientBranchMember> clientBranchMembers { get; set; }
-    
+        public DbSet<Category> Categories { get; set; }
+
 
     }
 }

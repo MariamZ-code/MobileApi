@@ -147,21 +147,23 @@ namespace MediConsultMobileApi.Controllers
                     return BadRequest(new MessageDto { Message = "Member Id not found" });
 
                 }
-                var request = requestRepo.AddRequest(requestDto);
 
                 var serverPath = AppDomain.CurrentDomain.BaseDirectory;
-                var folder = Path.Combine(serverPath, "MemberPortalApp", requestDto.Member_id.ToString(), "Approvals", request.ID.ToString());
 
-               
 
-                for (int i = 0; i < files.Count; i++)
+                if (files.Count == 0)
+                {
+                    return BadRequest(new MessageDto { Message = "Please uploade File " });
+
+                }
+                for (int j = 0; j < files.Count; j++)
                 {
 
-                    if (files[i] is null || files[i].Length == 0)
+                    if (files[j].Length == 0)
                     {
                         return BadRequest("No file uploaded.");
                     }
-                    if (files[i].Length > maxSizeBytes)
+                    if (files[j].Length >= maxSizeBytes)
                     {
                         return BadRequest($"File size must be less than 5 MB.");
                     }
@@ -169,36 +171,44 @@ namespace MediConsultMobileApi.Controllers
 
                     foreach (var extension in validExtensions)
                     {
-                        if (files[i].FileName.EndsWith(extension))
+                        if (!files[j].FileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
                         {
-                            if (!Directory.Exists(folder))
-                            {
-                                Directory.CreateDirectory(folder);
-                            }
-                            string uniqueFileName = Guid.NewGuid().ToString() + "_" + files[i].FileName;
-
-                            string filePath = Path.Combine(folder, uniqueFileName);
-
-
-                            using (FileStream stream = new FileStream(filePath, FileMode.Create))
-                            {
-                                await files[i].CopyToAsync(stream);
-                            }
-
+                            // If any extension doesn't match, continue to the next extension
+                            continue;
                         }
                         else
                         {
-                             return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
+                            return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
 
                         }
-                       
                     }
+                   
+
+                }
+                var request = requestRepo.AddRequest(requestDto);
+                var folder = Path.Combine(serverPath, "MemberPortalApp", requestDto.Member_id.ToString(), "Approvals", request.ID.ToString());
+
+                for (int i = 0; i < files.Count; i++)
+                {
+                    if (!Directory.Exists(folder))
+                    {
+                        Directory.CreateDirectory(folder);
+                    }
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + files[i].FileName;
+
+                    string filePath = Path.Combine(folder, uniqueFileName);
 
 
-                    return Ok(request);
+                    using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await files[i].CopyToAsync(stream);
+                    }
                 }
 
-                return BadRequest(new MessageDto { Message = "Please uploade File " });
+
+
+                return Ok(request);
+
             }
             return BadRequest(ModelState);
 

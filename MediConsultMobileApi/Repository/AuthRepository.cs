@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
 using System.Net.Mail;
 using System.Net;
+using MediConsultMobileApi.Services;
 
 namespace MediConsultMobileApi.Repository
 {
@@ -18,7 +19,7 @@ namespace MediConsultMobileApi.Repository
         }
         #region Login
 
-        #endregion
+      
         public async Task<MessageDto> Login(LoginUserDto userDto)
         {
             var authDto = new MessageDto();
@@ -38,10 +39,11 @@ namespace MediConsultMobileApi.Repository
                 return authDto;
             }
             
-            authDto.Message = " Login Successfully";
+            authDto.Message = "Login Successfully";
 
             return authDto;
         }
+        #endregion
 
         #region MemberExists
         public bool MemberLoginExists(int? memberId)
@@ -50,8 +52,23 @@ namespace MediConsultMobileApi.Repository
 
         }
 
+
         #endregion
 
+        public Login ResetPassword(int memberId)
+        {
+           return dbContext.logins.FirstOrDefault(m => m.member_id == memberId);
+        }
 
-}
+
+
+        //public Login ChangePassword(int otp)
+        //{
+        //    //return dbContext.logins.FirstOrDefault(m => m.Otp == otp );
+        //}
+
+
+
+
+    }
 }
