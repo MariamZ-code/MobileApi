@@ -9,8 +9,8 @@ namespace MediConsultMobileApi.DTO
 
         public int? ProviderName { get; set; }
         public string? Status { get; set; }
+     
 
-        
 
 
 

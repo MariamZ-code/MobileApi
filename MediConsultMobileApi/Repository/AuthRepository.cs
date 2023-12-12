@@ -62,12 +62,36 @@ namespace MediConsultMobileApi.Repository
 
 
 
-        //public Login ChangePassword(int otp)
-        //{
-        //    //return dbContext.logins.FirstOrDefault(m => m.Otp == otp );
-        //}
 
+        #region SendOtp
 
+        public  void SendOtp(string otp, int memberId)
+        {
+            var member = ResetPassword(memberId);
+            member.Otp = otp;
+
+            dbContext.logins.Update(member);
+            dbContext.SaveChanges();
+
+        }
+        #endregion
+
+        #region ChangePassword
+
+        public void ChangePass(string otp,int id , ChangePasswordDTO changeDto)
+        {
+            var member = ResetPassword(id);
+
+          
+                member.the_password = changeDto.Password;
+
+                dbContext.logins.Update(member);
+
+                dbContext.SaveChanges();
+
+        }
+
+        #endregion
 
 
     }

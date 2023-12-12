@@ -7,12 +7,13 @@ namespace MediConsultMobileApi.DTO
     public class RequestDetailsDTO
     {
         public int Id { get; set; }
-        public Approval? Approval { get; set; }
-        public string? CreatedDate { get; set; }
         public int? ApprovalId { get; set; } 
-        public string? Status { get; set; } 
+        public int? ProviderId { get; set; }
+        public string ProviderName { get; set; }
+      
         public string? Notes { get; set; }
 
+        public Approval? Approval { get; set; }
 
 
     }

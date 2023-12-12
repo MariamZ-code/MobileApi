@@ -94,7 +94,15 @@ namespace MediConsultMobileApi.Controllers
                         MemberBirthday = families[i].member_birthday,
                         //Member
                         MemberLevel = families[i].member_level,
-                        MemberStatus = families[i].member_status
+
+                        MemberStatus = families[i].member_status,
+
+                        PhoneNumber = families[i].mobile,
+
+                        NationalId = families[i].member_nid,
+
+                        Photo = families[i].member_photo,
+
 
                     };
                     famDto.Add(member);
@@ -125,13 +133,17 @@ namespace MediConsultMobileApi.Controllers
 
                 var memberDTo = new MemberDetailsDTO
                 {
+
                     member_id = member.member_id,
                     member_name = member.member_name,
                     member_gender = member.member_gender,
                     email = member.email,
                     member_nid = member.member_nid,
                     member_photo = member.member_photo,
-                    mobile = member.mobile
+                    mobile = member.mobile,
+                    birthDate = member.member_birthday,
+                    jobTitle = member.job_title
+
                 };
                 return Ok(memberDTo);
             }
@@ -156,9 +168,9 @@ namespace MediConsultMobileApi.Controllers
                 {
                     return BadRequest(new MessageDto { Message = "Member ID Not Found " });
                 }
-                var existingMemberWithSameMobile =  memberRepo.GetMemberByMobile(memberDTO.Mobile);
-                var existingMemberWithSameEmail =  memberRepo.GetMemberByEmail(memberDTO.Email);
-                var existingMemberWithSameNationalId =  memberRepo.GetMemberByNationalId(memberDTO.SSN);
+                var existingMemberWithSameMobile = memberRepo.GetMemberByMobile(memberDTO.Mobile);
+                var existingMemberWithSameEmail = memberRepo.GetMemberByEmail(memberDTO.Email);
+                var existingMemberWithSameNationalId = memberRepo.GetMemberByNationalId(memberDTO.SSN);
 
 
                 if (memberDTO.Email is not null)
@@ -242,40 +254,48 @@ namespace MediConsultMobileApi.Controllers
                     var folder = Path.Combine(serverPath, "Members", result.member_id.ToString());
 
 
-                    foreach (var extension in validExtensions)
+                    if (memberDTO.Photo.Length == 0)
                     {
-                        if (!memberDTO.Photo.FileName.EndsWith(extension))
-                        {
+                        return BadRequest("No file uploaded.");
+                    }
+                    if (memberDTO.Photo.Length >= maxSizeBytes)
+                    {
+                        return BadRequest($"File size must be less than 5 MB.");
+                    }
+                    
+                    switch (Path.GetExtension(memberDTO.Photo.FileName))
+                    {
+                        case ".pdf":
+                        case ".png":
+                        case ".jpg":
+                        case ".jpeg":
+                            break;
+                        default:
                             return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
+                    }
+                    if (!Directory.Exists(folder))
+                    {
+                        Directory.CreateDirectory(folder);
+                    }
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + memberDTO.Photo.FileName;
 
-                        }
-                        if (!Directory.Exists(folder))
-                        {
-                            Directory.CreateDirectory(folder);
-                        }
-
-
-                        string uniqueFileName = Guid.NewGuid().ToString() + "_" + memberDTO.Photo.FileName;
-
-                        string filePath = Path.Combine(folder, uniqueFileName);
+                    string filePath = Path.Combine(folder, uniqueFileName);
 
 
-                        using (FileStream stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await memberDTO.Photo.CopyToAsync(stream);
-                        }
-
+                    using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await memberDTO.Photo.CopyToAsync(stream);
                     }
                 }
-                memberRepo.UpdateMember(memberDTO, id);
 
-                memberRepo.SaveDatabase();
                 return Ok(new MessageDto { Message = "Done" });
-
-
             }
-            return BadRequest(ModelState);
+            return BadRequest(ModelState);  
         }
+              
+
+
+          
         #endregion
 
     }

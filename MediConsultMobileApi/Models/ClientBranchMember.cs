@@ -37,6 +37,7 @@ namespace MediConsultMobileApi.Models
         [JsonIgnore]
         public int? member_HOF_id { get; set; }
 
+        public string? job_title { get; set; }
 
     }
 }

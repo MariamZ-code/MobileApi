@@ -18,6 +18,10 @@ namespace MediConsultMobileApi.DTO
         [MaxLength(50)]
         public string MemberGender { get; set; }
         public string MemberStatus { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? NationalId { get; set; }
+        public string? Photo { get; set; }
+
 
     }
 }

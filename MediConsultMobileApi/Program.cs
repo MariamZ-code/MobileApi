@@ -22,6 +22,8 @@ builder.Services.AddScoped<IProviderDataRepository , ProviderDataRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 builder.Services.AddScoped<IMedicalNetworkRepository , MedicalNetworkRepository>();
 builder.Services.AddScoped<ITokenRepository , TokenRepository>();
+builder.Services.AddScoped<ICategoryRepository , CategoryRepository>();
+builder.Services.AddScoped<IRefundRepository, RefundRepository>();
 builder.Services.AddScoped<IValidation, Validation>();
 builder.Services.AddScoped<ISMSService , SMSService>();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("cs")));

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -109,8 +110,10 @@ namespace MediConsultMobileApi.Controllers
                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     //GET Method
                     HttpResponseMessage response = await client.PostAsync(url,content);
+                    
                     if (response.IsSuccessStatusCode)
                     {
+                        authRepo.SendOtp(otp, memberId);
                         return Ok(new MessageDto
                         {
                             Message = "OTP Message delivered"
@@ -161,6 +164,7 @@ namespace MediConsultMobileApi.Controllers
 
             //message.Headers.Add("X-Priority", "2");
             //message.Headers.Add("X-MSMail-Priority", "Normal");
+
             string otp = GenerateOtp();
 
             var bodyBuilder = new BodyBuilder();
@@ -174,10 +178,55 @@ namespace MediConsultMobileApi.Controllers
                 client.Send(message);
                 client.Disconnect(true);
             }
+            authRepo.SendOtp(otp, memberId);
+
             return Ok("Send");
         }
         #endregion
 
-    }
+
+
+        #region ChangePassword
+
+        [HttpPut("ChangePassword")]
+        public IActionResult ChangePassword([Required][FromQuery] string otp, ChangePasswordDTO changeDto , [Required]int id)
+        {
+            if (ModelState.IsValid)
+            {
+                
+               var member = authRepo.ResetPassword(id);
+                if (member is null)
+                {
+                    return BadRequest("Member not found");
+
+                }
+
+                if ( member.member_id != id )
+                {
+                    return BadRequest("Member id is incorrect");
+
+                }
+                if (otp != member.Otp)
+                {
+                  return BadRequest("Otp is incorrect");
+
+                }
+                if (changeDto.ConfirmPassword != changeDto.Password)
+                {
+                    return BadRequest("Password not Equal ConfirmPasswod");
+
+                }
+
+                authRepo.ChangePass(otp, id ,changeDto);
+
+                return Ok("Done");
+
+
+            }
+            return BadRequest(ModelState);
+        }
+
+            #endregion
+        }
 
 }

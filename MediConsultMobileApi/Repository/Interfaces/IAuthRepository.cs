@@ -11,6 +11,10 @@ namespace MediConsultMobileApi.Repository.Interfaces
 
         Login ResetPassword(int memberId);
 
+        void SendOtp(string otp, int memberId);
+
+        void ChangePass(string otp, int id, ChangePasswordDTO changeDto);
+
 
     }
 }

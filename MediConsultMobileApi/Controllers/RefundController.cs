@@ -3,52 +3,36 @@ using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Linq;
 
 namespace MediConsultMobileApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RequestController : ControllerBase
+    public class RefundController : ControllerBase
     {
-        private readonly IRequestRepository requestRepo;
-        private readonly IProviderDataRepository providerRepo;
+        private readonly IRefundRepository refundRepo;
         private readonly IMemberRepository memberRepo;
-        private readonly ApplicationDbContext dbContext;
 
-        public RequestController(IRequestRepository requestRepo, IProviderDataRepository providerRepo, IMemberRepository memberRepo , ApplicationDbContext dbContext)
+        public RefundController(IRefundRepository refundRepo, IMemberRepository memberRepo)
         {
-            this.requestRepo = requestRepo;
-            this.providerRepo = providerRepo;
+            this.refundRepo = refundRepo;
             this.memberRepo = memberRepo;
-            this.dbContext = dbContext;
         }
 
-        #region AddNewRequest
-        [HttpPost]
-
-        
-        public async Task<IActionResult> PostRequest([FromForm] RequestDTO requestDto, [FromForm] List<IFormFile> files)
+        #region AddNewRefund
+        [HttpPost("AddNewRefund")]
+        public async Task<IActionResult> PostRefund([FromForm] RefundDTO refundDto, [FromForm] List<IFormFile> files)
         {
 
             const long maxSizeBytes = 5 * 1024 * 1024;
             if (ModelState.IsValid)
             {
 
-                var providerExists = await providerRepo.ProviderExistsAsync(requestDto.Provider_id);
-                var memberExists = memberRepo.MemberExists(requestDto.Member_id);
-                if (requestDto.Provider_id is null)
-                {
-                    return BadRequest(new MessageDto { Message = "Enter Provider Id" });
-                }
-                if (!providerExists)
-                {
-                    return BadRequest(new MessageDto { Message = "Provider Id not found" });
-                }
-                if (requestDto.Member_id is null)
+                var memberExists = memberRepo.MemberExists(refundDto.member_id);
+              
+                if (refundDto.member_id is null)
                 {
                     return BadRequest(new MessageDto { Message = "Enter member Id" });
                 }
@@ -79,7 +63,7 @@ namespace MediConsultMobileApi.Controllers
                         return BadRequest($"File size must be less than 5 MB.");
                     }
                     // image.png --0
-                    switch (Path.GetExtension( files[j].FileName))
+                    switch (Path.GetExtension(files[j].FileName))
                     {
                         case ".pdf":
                         case ".png":
@@ -90,8 +74,8 @@ namespace MediConsultMobileApi.Controllers
                             return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
                     }
                 }
-                var request = requestRepo.AddRequest(requestDto);
-                var folder = Path.Combine(serverPath, "MemberPortalApp", requestDto.Member_id.ToString(), "Approvals", request.ID.ToString());
+                var refund = refundRepo.AddRefund(refundDto);
+                var folder = Path.Combine(serverPath, "MemberPortalApp", refundDto.member_id.ToString(), "Approvals", refund.id.ToString());
 
                 for (int i = 0; i < files.Count; i++)
                 {
@@ -112,26 +96,27 @@ namespace MediConsultMobileApi.Controllers
 
 
 
-                return Ok(request);
+                return Ok(refund);
 
             }
             return BadRequest(ModelState);
 
 
         }
-
         #endregion
 
-        #region RequestByMemberId
-        [HttpGet("MemberId")]
+
+
+        #region RefundByMemberId
+        [HttpGet("HistoryRefund")]
 
         public IActionResult GetbyMemberId([Required] int memberId, [FromQuery] string? startDate, [FromQuery] string? endDate, [FromQuery] string[]? status, [FromQuery] string[]? providers, [FromQuery] int startpage = 1, [FromQuery] int pageSize = 10)
         {
             if (ModelState.IsValid)
             {
 
-                var requests = requestRepo.GetRequestsByMemberId(memberId);
-                var reqDto = new List<RequestDetailsForMemberDTO>();
+                var refunds = refundRepo.GetRefundByMemberId(memberId);
+                var refDto = new List<RefundDetailsForMemberDTO>();
                 var memberExist = memberRepo.MemberExists(memberId);
 
                 if (!memberExist)
@@ -139,61 +124,61 @@ namespace MediConsultMobileApi.Controllers
                     return NotFound(new MessageDto { Message = "Member Id not found" });
 
                 }
-                if (requests is null)
+                if (refunds is null)
                 {
                     return NotFound(new MessageDto { Message = "Request not found" });
 
                 }
 
-             
+
                 if (status != null && status.Any())
                 {
                     for (int i = 0; i < status.Length; i++)
                     {
                         var sta = status[i];
                     }
-                    requests = requests.Where(c => status.Contains(c.Status));
+                    refunds = refunds.Where(c => status.Contains(c.Status));
                 }
-                if (providers != null && providers.Any())
-                {
-                    for (int i = 0; i < providers.Length; i++)
-                    {
-                        var provider = providers[i]; 
-                    requests = requests.Where(p => p.Provider.Provider_name_en.Contains(provider));
-                    }
-                   
+                //if (providers != null && providers.Any())
+                //{
+                //    for (int i = 0; i < providers.Length; i++)
+                //    {
+                //        var provider = providers[i];
+                //        requests = requests.Where(p => p.Provider.Provider_name_en.Contains(provider));
+                //    }
 
-                }
+
+                //}
                 if (endDate is not null || startDate is not null)
                 {
 
                     DateTime startDat = DateTime.ParseExact(startDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
                     DateTime endDat = DateTime.ParseExact(endDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
 
-                    requests = requests
+                    refunds = refunds
                          .AsEnumerable().Where(entity =>
                                DateTime.TryParseExact(entity.created_date, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var entityDate) &&
                                entityDate >= startDat &&
                                entityDate <= endDat)
                         .AsQueryable();
                 }
-                var totalProviders = requests.Count();
-                requests = requests.Skip((startpage - 1) * pageSize).Take(pageSize).OrderByDescending(e => e.Provider.Provider_name_en);
-                foreach (var request in requests)
+                var totalProviders = refunds.Count();
+                refunds = refunds.Skip((startpage - 1) * pageSize).Take(pageSize);
+                foreach (var refund in refunds)
                 {
-                   
 
-                    RequestDetailsForMemberDTO reqDetalisDto = new RequestDetailsForMemberDTO
+
+                    RefundDetailsForMemberDTO refDetalisDto = new RefundDetailsForMemberDTO
                     {
 
-                        Id = request.ID,
-                        CreatedDate = request.created_date,
-                        ProviderName = request.Provider.Provider_name_en,
-                        Status = request.Status
+                        Id = refund.id,
+                        CreatedDate = refund.created_date,
+                        //RefundType = refund.Provider.Provider_name_en,
+                        Status = refund.Status
 
                     };
 
-                    reqDto.Add(reqDetalisDto);
+                    refDto.Add(refDetalisDto);
                 }
 
                 var medicalDto = new
@@ -202,7 +187,7 @@ namespace MediConsultMobileApi.Controllers
                     TotalCount = totalProviders,
                     PageNumber = startpage,
                     PageSize = pageSize,
-                    Requests = reqDto,
+                    Refund = refDto,
 
 
                 };
@@ -215,36 +200,7 @@ namespace MediConsultMobileApi.Controllers
 
         #endregion
 
-        #region RequestByRequestId
-        [HttpGet("RequestId")]
 
-        public async Task<IActionResult> GetResultByID([Required] int id)
-        {
-            if (ModelState.IsValid)
-            {
-                var request = await requestRepo.GetById(id);
-                if (request is null)
-                {
-                    return NotFound(new MessageDto { Message = $"Id  not found" });
-                }
-
-                var reqDto = new RequestDetailsDTO
-                {
-                    Id = request.ID,
-                    ApprovalId = request.Approval_id,
-                    //ProviderName = request.Provider.Provider_name_en,
-                    ProviderId = request.Provider_id,
-                    Approval = null,
-                    Notes = request.Notes
-
-
-                };
-                return Ok(reqDto);
-
-            }
-            return BadRequest(ModelState);
-        }
-        #endregion
 
     }
 }

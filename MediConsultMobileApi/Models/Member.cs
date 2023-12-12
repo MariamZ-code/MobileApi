@@ -22,6 +22,7 @@ namespace MediConsultMobileApi.Models
         public string? email { get; set; }
 
         public int? program_id { get; set; }
+        public string? job_title { get; set; }
 
     }
 }
