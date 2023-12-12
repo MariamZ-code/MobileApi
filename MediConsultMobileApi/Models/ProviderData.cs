@@ -13,6 +13,7 @@ namespace MediConsultMobileApi.Models
         [Required]
         [StringLength(200)]  
         public string Provider_name_en { get; set; }
+        public string Provider_name_ar { get; set; }
 
         public List<Request> Requests { get; set; }
     }

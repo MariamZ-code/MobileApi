@@ -17,16 +17,20 @@ namespace MediConsultMobileApi.Controllers
             this.providerRepo = providerRepo;
         }
 
-        [HttpGet]
 
-        public async Task<IActionResult> GetAll(string? providerName , int startpage =1, int pageSize = 10)
+        [HttpGet]
+        public async Task<IActionResult> GetAll(string? providerNameEn , string? providerNameAr, int startpage =1, int pageSize = 10)
         {
             if (ModelState.IsValid)
             {
                 var providers =  providerRepo.GetProviders();
-                if (providerName is not null)
+                if (providerNameEn is not null)
                 { 
-                    providers = providers.Where(p => p.Provider_name_en.Contains(providerName));
+                    providers = providers.Where(p => p.Provider_name_en.Contains(providerNameEn));
+                }
+                if (providerNameAr is not null)
+                {
+                    providers = providers.Where(p => p.Provider_name_ar.Contains(providerNameAr));
                 }
                 var totalProviders = providers.Count();
                 providers = providers.Skip((startpage - 1) * pageSize).Take(pageSize).OrderByDescending(e => e.Provider_name_en);

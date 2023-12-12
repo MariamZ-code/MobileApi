@@ -105,8 +105,6 @@ namespace MediConsultMobileApi.Controllers
         }
         #endregion
 
-
-
         #region RefundByMemberId
         [HttpGet("HistoryRefund")]
 
@@ -139,16 +137,7 @@ namespace MediConsultMobileApi.Controllers
                     }
                     refunds = refunds.Where(c => status.Contains(c.Status));
                 }
-                //if (providers != null && providers.Any())
-                //{
-                //    for (int i = 0; i < providers.Length; i++)
-                //    {
-                //        var provider = providers[i];
-                //        requests = requests.Where(p => p.Provider.Provider_name_en.Contains(provider));
-                //    }
-
-
-                //}
+           
                 if (endDate is not null || startDate is not null)
                 {
 
@@ -200,7 +189,35 @@ namespace MediConsultMobileApi.Controllers
 
         #endregion
 
+        #region RefundByRefundId
+        [HttpGet("RefundDetails")]
 
+        public async Task<IActionResult> GetResultByID([Required] int id)
+        {
+            if (ModelState.IsValid)
+            {
+                var refund = await refundRepo.GetById(id);
+                if (refund is null)
+                {
+                    return NotFound(new MessageDto { Message = $"Id  not found" });
+                }
+
+                var reqDto = new RefundDetailsDTO
+                {
+                    Id = refund.id,
+                    RefundId = refund.refund_id,
+                    Refund_date = refund.refund_date,
+                    RefundType = null,
+                    Notes = refund.notes
+
+
+                };
+                return Ok(reqDto);
+
+            }
+            return BadRequest(ModelState);
+        }
+        #endregion
 
     }
 }

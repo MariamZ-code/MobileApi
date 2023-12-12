@@ -39,6 +39,8 @@ namespace MediConsultMobileApi.Models
         public DbSet<Category> Categories { get; set; }
 
         public DbSet<Refund>  Refunds { get; set; }
+        public DbSet<Policy>  Policies { get; set; }
+        public DbSet<Service>  Services { get; set; }
 
 
     }

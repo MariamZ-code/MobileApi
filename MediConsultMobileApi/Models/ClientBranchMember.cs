@@ -37,6 +37,8 @@ namespace MediConsultMobileApi.Models
         [JsonIgnore]
         public int? member_HOF_id { get; set; }
 
+        // TODO : Add Column to DB
+
         public string? job_title { get; set; }
 
     }
