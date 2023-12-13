@@ -24,7 +24,14 @@ namespace MediConsultMobileApi.Controllers
         {
             if (ModelState.IsValid)
             {
+               var serviceExists =  policyRepo.ServiceExists(programId);
                var policies = await policyRepo.GetByProgramId(programId);
+
+              
+                if (serviceExists)
+                {
+                    return BadRequest("program id not found");
+                }
                 var policyListDto = new List<PolicyDTO>();
                 foreach (var policy in policies)
                 {
@@ -35,8 +42,8 @@ namespace MediConsultMobileApi.Controllers
                         Service_Class_Id = policy.Service_Class_Id,
                         SL_Copayment = policy.SL_Copayment,
                         SL_Limit = policy.SL_Limit,
-                        ServiceNameAr = policy.Service.Service_Class_Name_Ar,
-                        ServiceNameEn = policy.Service.Service_Class_Name_En
+                        ServiceNameAr = policy.Service?.Service_Class_Name_Ar,
+                        ServiceNameEn = policy.Service?.Service_Class_Name_En
 
                     };
                     policyListDto.Add(policyDto);

@@ -59,7 +59,10 @@ namespace MediConsultMobileApi.Repository
         }
         #endregion
 
-
+        //public async Task<bool> RefundExistsAsync(int? refund)
+        //{
+        //    return await dbContext.
+        //}
 
     }
 }

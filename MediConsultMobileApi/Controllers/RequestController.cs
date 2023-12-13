@@ -232,7 +232,7 @@ namespace MediConsultMobileApi.Controllers
                 {
                     Id = request.ID,
                     ApprovalId = request.Approval_id,
-                    //ProviderName = request.Provider.Provider_name_en,
+                    ProviderName = request.Provider?.Provider_name_en,
                     ProviderId = request.Provider_id,
                     Approval = null,
                     Notes = request.Notes

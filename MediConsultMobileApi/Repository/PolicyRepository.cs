@@ -14,7 +14,16 @@ namespace MediConsultMobileApi.Repository
         }
         public async Task<List<Policy>> GetByProgramId(int progId)
         {
-            return await dbContext.Policies.Where(p => p.Program_id == progId).AsNoTracking().ToListAsync();
+            return await dbContext.Policies.Include(p => p.Service).Where(p => p.Program_id == progId).AsNoTracking().ToListAsync();
         }
+
+        #region ServiceExist
+        public bool ServiceExists(int programId)
+        {
+            return dbContext.Services.Any(s => s.Service_Class_id == programId);
+
+        }
+
+        #endregion
     }
 }

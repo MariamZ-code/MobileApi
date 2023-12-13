@@ -9,5 +9,7 @@ namespace MediConsultMobileApi.Repository.Interfaces
         Task<Refund> GetById(int RefundId);
 
         IQueryable<Refund> GetRefundByMemberId(int memberId);
+
+        //Task<bool> RefundExistsAsync(int? refund);
     }
 }

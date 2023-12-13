@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MediConsultMobileApi.Models
 {
+    [Table("client_portal_refund_request_table")]
     public class Refund
     {
         [Key]
@@ -14,7 +16,7 @@ namespace MediConsultMobileApi.Models
         public string? created_date { get; set; } = DateTime.Now.ToString("dd-MM-yyyy");
 
         public string? refund_date { get; set; }
-        public double? amount { get; set; }
+        public double? total_amount { get; set; }
 
         public int? Provider_location_id { get; set; } = 0;
 

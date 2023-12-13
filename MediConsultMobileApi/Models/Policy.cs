@@ -16,7 +16,7 @@ namespace MediConsultMobileApi.Models
 
         public int Service_Class_Id { get; set; }
 
-        public Service Service { get; set; }
+        public virtual Service Service { get; set; }
         public double SL_Limit  { get; set; }
         public int SL_Copayment { get; set; }
 

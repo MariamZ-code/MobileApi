@@ -116,6 +116,7 @@ namespace MediConsultMobileApi.Controllers
                 var refunds = refundRepo.GetRefundByMemberId(memberId);
                 var refDto = new List<RefundDetailsForMemberDTO>();
                 var memberExist = memberRepo.MemberExists(memberId);
+                //var refundExsit = refundRepo.
 
                 if (!memberExist)
                 {
