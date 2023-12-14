@@ -2,9 +2,9 @@
 
 namespace MediConsultMobileApi.Repository.Interfaces
 {
-    public interface IPolicyTypeRepository
+    public interface IRefundTypeRepository
     {
-        Task<List<ClientPriceList>> GetRefundType();   
+        Task<List<ClientPriceList>> GetRefundTypeByOnProgram();
     }
 }
  

@@ -12,6 +12,7 @@ namespace MediConsultMobileApi.DTO
         public string ProviderName { get; set; }
       
         public string? Notes { get; set; }
+        public List<string> FolderPath { get; set; }
 
         public Approval? Approval { get; set; }
 

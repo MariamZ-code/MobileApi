@@ -8,14 +8,13 @@ namespace MediConsultMobileApi.DTO
        
         public string? Notes { get; set; }
 
-        //[JsonIgnore]
-
-        //public IFormFile? Folderpath { get; set; }
-
+       
         public int? Provider_id { get; set; }
 
         [JsonIgnore]
         public int? Member_id { get; set; }
+
+
 
        
     }

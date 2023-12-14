@@ -227,7 +227,9 @@ namespace MediConsultMobileApi.Controllers
                 {
                     return NotFound(new MessageDto { Message = $"Id  not found" });
                 }
-
+              
+                string[] fileNames = Directory.GetFiles(request.Folder_path);
+                List<string> fileNameList = fileNames.ToList();
                 var reqDto = new RequestDetailsDTO
                 {
                     Id = request.ID,
@@ -235,16 +237,20 @@ namespace MediConsultMobileApi.Controllers
                     ProviderName = request.Provider?.Provider_name_en,
                     ProviderId = request.Provider_id,
                     Approval = null,
-                    Notes = request.Notes
+                    Notes = request.Notes,
+                    FolderPath = fileNameList
 
 
                 };
+
+              
+
                 return Ok(reqDto);
 
             }
             return BadRequest(ModelState);
         }
         #endregion
-
+     
     }
 }

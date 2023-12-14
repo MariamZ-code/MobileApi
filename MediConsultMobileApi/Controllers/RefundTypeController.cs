@@ -8,9 +8,9 @@ namespace MediConsultMobileApi.Controllers
     [ApiController]
     public class RefundTypeController : ControllerBase
     {
-        private readonly IPolicyTypeRepository refundTypeRepo;
+        private readonly IRefundTypeRepository refundTypeRepo;
 
-        public RefundTypeController(IPolicyTypeRepository refundTypeRepo)
+        public RefundTypeController(IRefundTypeRepository refundTypeRepo)
         {
             this.refundTypeRepo = refundTypeRepo;
         }
@@ -20,8 +20,11 @@ namespace MediConsultMobileApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                var refundType =await refundTypeRepo.GetRefundType();
-                return Ok(refundType);
+                var refundTypes = await refundTypeRepo.GetRefundTypeByOnProgram();
+
+
+                return Ok(refundTypes);
+
             }
             return BadRequest(ModelState);
         }
