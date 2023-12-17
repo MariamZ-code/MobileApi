@@ -1,5 +1,6 @@
 ﻿using MailKit.Net.Smtp;
 using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Language;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using MediConsultMobileApi.Services;
@@ -23,12 +24,12 @@ namespace MediConsultMobileApi.Controllers
     {
         private readonly IAuthRepository authRepo;
 
-        private readonly ISMSService sMS ;
+        private readonly ISMSService sMS;
 
         private readonly IMemberRepository memberRepo;
         private readonly IValidation validation;
 
-        public LoginController(IAuthRepository authRepo, ISMSService sMS , IMemberRepository memberRepo , IValidation validation)
+        public LoginController(IAuthRepository authRepo, ISMSService sMS, IMemberRepository memberRepo, IValidation validation)
         {
             this.authRepo = authRepo;
             this.sMS = sMS;
@@ -38,26 +39,28 @@ namespace MediConsultMobileApi.Controllers
         #region Login
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginUserDto userDto )
+        public async Task<IActionResult> Login(LoginUserDto userDto, string lang)
         {
 
             if (userDto.Id == string.Empty || userDto.Password == string.Empty)
-                    {
-                        return BadRequest(new MessageDto { Message = "Id and Password is required " });
-                    }
+            {
+                return BadRequest(new MessageDto { Message = Messages.PasswordAndIdRequired(lang) });
 
-                if (!int.TryParse(userDto.Id, out _))
-                {
-                    return BadRequest(new MessageDto { Message = "Invalid Id" });
-                }
-                var user = await authRepo.Login(userDto);
+            }
 
-                if (user.Message is "Id or Password is incorrect" || user.Message is "Account Disabled")
-                {
-                    return BadRequest(user);
-                }
-                return Ok(user);                   
-                
+            if (!int.TryParse(userDto.Id, out _))
+            {
+                return BadRequest(new MessageDto { Message = Messages.InvalidId(lang) });
+
+            }
+            var user = await authRepo.Login(userDto, lang);
+
+            if (user.Message is "Id or Password is incorrect" || user.Message is "Account Disabled")
+            {
+                return BadRequest(user);
+            }
+            return Ok(user);
+
         }
         #endregion
 
@@ -75,7 +78,7 @@ namespace MediConsultMobileApi.Controllers
         #region ResetPasswordSendOTPSMS
 
         [HttpGet("ResetPasswordSendOTPSMS")]
-        public async Task<IActionResult> ResetPasswordSendOTPSMS(int memberId)
+        public async Task<IActionResult> ResetPasswordSendOTPSMS(int memberId , string lang)
         {
             if (ModelState.IsValid)
             {
@@ -83,41 +86,43 @@ namespace MediConsultMobileApi.Controllers
                 var memberMobile = memberRepo.GetByID(memberId).Result.mobile;
                 if (member is null)
                 {
-                    return BadRequest(new MessageDto { Message = "Not found Member" });
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
-                } 
+
+                }
                 if (memberMobile is null || memberMobile == string.Empty)
                 {
-                        return BadRequest("Mobile number not found");
+                    return BadRequest("Mobile number not found");
 
                 }
                 if (!memberMobile.StartsWith("01"))
                 {
-                    return BadRequest(new MessageDto { Message = "Mobile Number must start with 01" });
+                    return BadRequest(new MessageDto { Message = Messages.MobileStartWith(lang) });
+
                 }
                 if (memberMobile.Length != 11)
                 {
-                    return BadRequest(new MessageDto { Message = "Mobile Number must be 11 number" });
+                    return BadRequest(new MessageDto { Message = Messages.MobileNumberFormat(lang) });
+              
                 }
 
                 string otp = GenerateOtp();
-                string url = $"http://52.28.71.183/sms_api/Message/SendSMS?text={otp}&mobile={memberMobile}"; 
+                string url = $"http://52.28.71.183/sms_api/Message/SendSMS?text={otp}&mobile={memberMobile}";
                 using (var client = new HttpClient())
                 {
                     var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
 
-                   client.DefaultRequestHeaders.Accept.Clear();
-                   client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     //GET Method
-                    HttpResponseMessage response = await client.PostAsync(url,content);
-                    
+                    HttpResponseMessage response = await client.PostAsync(url, content);
+
                     if (response.IsSuccessStatusCode)
                     {
                         authRepo.SendOtp(otp, memberId);
-                        return Ok(new MessageDto
-                        {
-                            Message = "OTP Message delivered"
-                        });
+                      
+                        return Ok(new MessageDto { Message = Messages.DeliveredOtp(lang) });
+
                     }
                     else
                     {
@@ -134,25 +139,22 @@ namespace MediConsultMobileApi.Controllers
         #region ResetPasswordSendOTPEmail
         [HttpGet("ResetPasswordSendOTPEmail")]
 
-        public IActionResult SendEmail(int memberId)
+        public IActionResult SendEmail(int memberId , string lang)
         {
             var member = authRepo.ResetPassword(memberId);
             var memberEmail = memberRepo.GetByID(memberId).Result.email;
 
             if (memberEmail is not null)
             {
-             
+
                 if (!validation.IsValidEmail(memberEmail))
-                {
-                    return BadRequest(new MessageDto { Message = "Email is not valid." });
-                }
+                    return BadRequest(new MessageDto { Message = Messages.EmailNotValid(lang) }) ;
 
             }
-            if (memberEmail is null )
-            {
-                    return BadRequest(new MessageDto { Message = "Email is not Found." });
+            if (memberEmail is null)
+            
+                return BadRequest(new MessageDto { Message = Messages.Emailexist(lang) });
 
-            }
 
             var message = new MimeMessage();
 
@@ -169,7 +171,7 @@ namespace MediConsultMobileApi.Controllers
 
             var bodyBuilder = new BodyBuilder();
             bodyBuilder.HtmlBody = otp;
-          
+
             message.Body = bodyBuilder.ToMessageBody();
             using (var client = new SmtpClient())
             {
@@ -180,7 +182,8 @@ namespace MediConsultMobileApi.Controllers
             }
             authRepo.SendOtp(otp, memberId);
 
-            return Ok("Send");
+            return Ok(new MessageDto { Message = Messages.DeliveredOtp(lang) });
+
         }
         #endregion
 
@@ -189,44 +192,48 @@ namespace MediConsultMobileApi.Controllers
         #region ChangePassword
 
         [HttpPut("ChangePassword")]
-        public IActionResult ChangePassword([Required][FromQuery] string otp, ChangePasswordDTO changeDto , [Required]int id)
+        public IActionResult ChangePassword([Required][FromQuery] string otp, ChangePasswordDTO changeDto, [Required] int id , string lang)
         {
             if (ModelState.IsValid)
             {
-                
-               var member = authRepo.ResetPassword(id);
+
+                var member = authRepo.ResetPassword(id);
                 if (member is null)
                 {
-                    return BadRequest("Member not found");
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+
 
                 }
 
-                if ( member.member_id != id )
+                if (member.member_id != id)
                 {
-                    return BadRequest("Member id is incorrect");
+                    return BadRequest(new MessageDto { Message = Messages.IncorrectId(lang) });
+
 
                 }
                 if (otp != member.Otp)
                 {
-                  return BadRequest("Otp is incorrect");
+                    return BadRequest(new MessageDto { Message = Messages.IncorrectOtp(lang) });
+                   
 
                 }
                 if (changeDto.ConfirmPassword != changeDto.Password)
                 {
-                    return BadRequest("Password not Equal ConfirmPasswod");
 
+                    return BadRequest(new MessageDto { Message = Messages.PasswordAndConfirmPassword(lang) });
+            
                 }
 
-                authRepo.ChangePass(otp, id ,changeDto);
+                authRepo.ChangePass(otp, id, changeDto);
 
-                return Ok("Done");
+                return Ok(new MessageDto { Message = Messages.ChangePassword(lang) });
 
 
             }
             return BadRequest(ModelState);
         }
 
-            #endregion
-        }
+        #endregion
+    }
 
 }

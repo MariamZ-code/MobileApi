@@ -5,7 +5,7 @@ namespace MediConsultMobileApi.Repository.Interfaces
 {
     public interface IAuthRepository
     {
-        Task<MessageDto> Login(LoginUserDto userDto);
+        Task<MessageDto> Login(LoginUserDto userDto, string lang);
 
         bool MemberLoginExists(int? memberId);
 

@@ -1,4 +1,6 @@
-﻿using MediConsultMobileApi.Repository.Interfaces;
+﻿using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Models;
+using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,12 +19,43 @@ namespace MediConsultMobileApi.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(string lang)
         {
             if(ModelState.IsValid)
             {
-                var category = await categoryRepo.GetAll();
-                return Ok(category);
+                var categories = await categoryRepo.GetAll();
+                if (lang == "en")
+                {
+                    var categoryEn = new List<CategoryEnDTO>();
+                    foreach (var category in categories)
+                    {
+                        CategoryEnDTO categoryEnDto = new CategoryEnDTO
+                        {
+
+                          Category_Id = category.Category_Id,
+                          Category_Name_En = category.Category_Name_En,
+                        };
+
+                        categoryEn.Add(categoryEnDto);
+                    }
+
+                     return Ok(categoryEn);
+
+                }
+                var categoryAr = new List<CategoryArDTO>();
+                foreach (var category in categories)
+                {
+                    CategoryArDTO categoryArDto = new CategoryArDTO
+                    {
+
+                        Category_Id = category.Category_Id,
+                        Category_Name_Ar = category.Category_Name_Ar,
+                    };
+
+                    categoryAr.Add(categoryArDto);
+                }
+
+                return Ok(categoryAr);
             }
             return BadRequest(ModelState);
         }

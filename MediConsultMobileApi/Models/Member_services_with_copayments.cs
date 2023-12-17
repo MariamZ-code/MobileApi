@@ -10,8 +10,9 @@ namespace MediConsultMobileApi.Models
     {
         [Key]
         public int program_id { get; set; }
-        public string service_name { get; set; }
-        public string copayment { get; set; }
+        public string service_nameEn { get; set; }
+        public string service_nameAr { get; set; }
+        public int copayment { get; set; }
     }
 
 }

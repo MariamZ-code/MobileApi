@@ -1,8 +1,9 @@
-﻿using FirebaseAdmin;
+﻿   using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Language;
 using MediConsultMobileApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,11 +25,12 @@ namespace MediConsultMobileApi.Controllers
         }
 
         [HttpPost("SendNotification")]
-        public async Task<IActionResult> SendNotification([FromBody] NotificationMessage notificationMessage)
+        public async Task<IActionResult> SendNotification([FromBody] NotificationMessage notificationMessage , string lang)
         {
             if (notificationMessage == null)
             {
-                return BadRequest(new MessageDto { Message = "Invalid notification message" });
+                return BadRequest(new MessageDto { Message = Messages.NotificationValid(lang) });
+
             }
 
             var userIds = notificationMessage.membersIds.Select(id => id.ToString()).ToList();
@@ -40,7 +42,8 @@ namespace MediConsultMobileApi.Controllers
 
             if (firebaseTokens.Count == 0)
             {
-                return NotFound(new MessageDto { Message = "No valid tokens found for the specified members" });
+                return BadRequest(new MessageDto { Message = Messages.NotificationToken(lang) });
+
             }
 
             if (notificationMessage.ImageUrl == string.Empty)
@@ -57,13 +60,14 @@ namespace MediConsultMobileApi.Controllers
                 };
 
                 var response = await FirebaseMessaging.DefaultInstance.SendMulticastAsync(message);
-                return Ok(new MessageDto { Message = "Notification sent successfully" });
+                return Ok(new MessageDto { Message = Messages.NotificationSend(lang) });
 
 
             }
             if (!IsUrlValid(notificationMessage.ImageUrl))
             {
-                return BadRequest(new MessageDto { Message = "Imges not Url " });
+                return BadRequest(new MessageDto { Message = Messages.NotificationImage(lang) });
+
 
             }
             var messa = new MulticastMessage
@@ -79,7 +83,8 @@ namespace MediConsultMobileApi.Controllers
 
             var respo = await FirebaseMessaging.DefaultInstance.SendMulticastAsync(messa);
 
-            return Ok(new MessageDto { Message = "Notification sent successfully" });
+            return Ok(new MessageDto { Message = Messages.NotificationSend(lang) });
+
 
 
         }
@@ -94,7 +99,7 @@ namespace MediConsultMobileApi.Controllers
 
         [Route("SendNotificationToAll")]
         [HttpPost]
-        public async Task<IActionResult> SendNotificationToAll([Required][FromBody] NotificationMessageToAll notificationMessage)
+        public async Task<IActionResult> SendNotificationToAll([Required][FromBody] NotificationMessageToAll notificationMessage , string lang)
         {
 
             if (notificationMessage.ImageUrl == string.Empty)
@@ -111,13 +116,14 @@ namespace MediConsultMobileApi.Controllers
                 };
 
                 var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-                return Ok(new MessageDto { Message = "Notification sent successfully" });
+                return Ok(new MessageDto { Message = Messages.NotificationSend(lang) });
+
 
 
             }
             if (!IsUrlValid(notificationMessage.ImageUrl))
             {
-                return BadRequest(new MessageDto { Message = "Imges not Url " });
+                return BadRequest(new MessageDto { Message = Messages.NotificationImage(lang) });
 
             }
             var messa = new Message
@@ -134,7 +140,8 @@ namespace MediConsultMobileApi.Controllers
 
             var respo = await FirebaseMessaging.DefaultInstance.SendAsync(messa);
 
-            return Ok(new MessageDto { Message = "Notification sent successfully" });
+            return Ok(new MessageDto { Message = Messages.NotificationSend(lang) });
+
 
         }
     }

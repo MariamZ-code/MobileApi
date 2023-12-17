@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Net.Mail;
 using System.Net;
 using MediConsultMobileApi.Services;
+using MediConsultMobileApi.Language;
 
 namespace MediConsultMobileApi.Repository
 {
@@ -20,26 +21,26 @@ namespace MediConsultMobileApi.Repository
         #region Login
 
       
-        public async Task<MessageDto> Login(LoginUserDto userDto)
+        public async Task<MessageDto> Login(LoginUserDto userDto , string lang)
         {
             var authDto = new MessageDto();
             var user = await dbContext.logins.FirstOrDefaultAsync(u => u.member_id == int.Parse(userDto.Id) && u.the_password == userDto.Password);
          
             if (user is null)
             {
-               authDto.Message = "Id or Password is incorrect";
+               authDto.Message = Messages.PasswordAndIdIncorrect(lang);
                
                 return authDto;
             }
           
             if (user.is_enabled == 0)
             {
-                authDto.Message = "Account Disabled";
+                authDto.Message =Messages.AccountDisabled(lang);
 
                 return authDto;
             }
             
-            authDto.Message = "Login Successfully";
+            authDto.Message = Messages.LoginSuccessfully(lang);
 
             return authDto;
         }

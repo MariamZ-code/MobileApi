@@ -1,4 +1,5 @@
-﻿using MediConsultMobileApi.Models;
+﻿using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,31 +12,70 @@ namespace MediConsultMobileApi.Controllers
     {
         private readonly IServiceRepository serviceRepo;
         private readonly IMemberRepository memberRepo;
-     
-        public ServiceController(IServiceRepository serviceRepo , IMemberRepository memberRepo)
+
+        public ServiceController(IServiceRepository serviceRepo, IMemberRepository memberRepo)
         {
             this.serviceRepo = serviceRepo;
             this.memberRepo = memberRepo;
-            
+
         }
         [HttpGet("memberId")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, string lang)
         {
 
-            var member = await memberRepo.GetByID(id); // member 
-            var valid = await memberRepo.validation(member); // msg 
-            if (valid.Message is null)
+            if (ModelState.IsValid)
             {
-                
-                var service = await serviceRepo.GetById(member);
-                return Ok(service);
+                var member = await memberRepo.GetByID(id); // member 
+                var valid = await memberRepo.validation(member); // msg 
+                if (valid.Message is null)
+                {
+                    var services = await serviceRepo.GetById(member);
+                    var serviceEn = new List<ServiceEnDTO>();
+                    var serviceAr = new List<ServiceArDTO>();
+                    if (lang == "en")
+                    {
+                        foreach (var service in services)
+                        {
+                            ServiceEnDTO serviceEnDto = new ServiceEnDTO
+                            {
+
+                              program_id = service.program_id,
+                              service_nameEn = service.service_nameEn,
+                              copayment = service.copayment
+
+                            };
+
+                            serviceEn.Add(serviceEnDto);
+
+                        }
+                        return Ok(serviceEn);
+
+                    }
+                    foreach (var service in services)
+                    {
+                        ServiceArDTO serviceArDto = new ServiceArDTO
+                        {
+
+                            program_id = service.program_id,
+                            service_nameAr = service.service_nameAr,
+                            copayment = service.copayment
+
+                        };
+
+                        serviceAr.Add(serviceArDto);
+
+                    }
+                    return Ok(serviceAr);
+
+                }
+
+
+                return Ok(valid.Message);
 
             }
+            return BadRequest(ModelState);
 
 
-            return Ok(valid.Message);
-
-        
         }
     }
 }

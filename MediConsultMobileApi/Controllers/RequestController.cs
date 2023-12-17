@@ -1,4 +1,5 @@
 ﻿using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Language;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +32,7 @@ namespace MediConsultMobileApi.Controllers
         [HttpPost]
 
         
-        public async Task<IActionResult> PostRequest([FromForm] RequestDTO requestDto, [FromForm] List<IFormFile> files)
+        public async Task<IActionResult> PostRequest([FromForm] RequestDTO requestDto, [FromForm] List<IFormFile> files , string lang)
         {
 
             const long maxSizeBytes = 5 * 1024 * 1024;
@@ -42,20 +43,20 @@ namespace MediConsultMobileApi.Controllers
                 var memberExists = memberRepo.MemberExists(requestDto.Member_id);
                 if (requestDto.Provider_id is null)
                 {
-                    return BadRequest(new MessageDto { Message = "Enter Provider Id" });
+                    return BadRequest(new MessageDto { Message = Messages.EnterProvider(lang)});
                 }
                 if (!providerExists)
                 {
-                    return BadRequest(new MessageDto { Message = "Provider Id not found" });
+                    return BadRequest(new MessageDto { Message = Messages.ProviderNotFound(lang)});
                 }
                 if (requestDto.Member_id is null)
                 {
-                    return BadRequest(new MessageDto { Message = "Enter member Id" });
+                    return BadRequest(new MessageDto { Message = Messages.EnterMember(lang) });
                 }
 
                 if (!memberExists)
                 {
-                    return BadRequest(new MessageDto { Message = "Member Id not found" });
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang)});
 
                 }
 
@@ -64,7 +65,7 @@ namespace MediConsultMobileApi.Controllers
                 string[] validExtensions = { ".pdf", ".jpg", ".jpeg", ".png" };
                 if (files.Count == 0)
                 {
-                    return BadRequest(new MessageDto { Message = "Please uploade File " });
+                    return BadRequest(new MessageDto { Message = Messages.NoFileUploaded(lang) });
 
                 }
                 for (int j = 0; j < files.Count; j++)
@@ -72,11 +73,11 @@ namespace MediConsultMobileApi.Controllers
 
                     if (files[j].Length == 0)
                     {
-                        return BadRequest("No file uploaded.");
+                        return BadRequest(new MessageDto { Message = Messages.NoFileUploaded(lang) });
                     }
                     if (files[j].Length >= maxSizeBytes)
                     {
-                        return BadRequest($"File size must be less than 5 MB.");
+                        return BadRequest(new MessageDto { Message = Messages.SizeOfFile(lang) });
                     }
                     // image.png --0
                     switch (Path.GetExtension( files[j].FileName))
@@ -87,7 +88,7 @@ namespace MediConsultMobileApi.Controllers
                         case ".jpeg":
                             break;
                         default:
-                            return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
+                            return BadRequest(new MessageDto { Message = Messages.FileExtension(lang) });
                     }
                 }
                 var request = requestRepo.AddRequest(requestDto);
@@ -125,7 +126,7 @@ namespace MediConsultMobileApi.Controllers
         #region RequestByMemberId
         [HttpGet("MemberId")]
 
-        public IActionResult GetbyMemberId([Required] int memberId, [FromQuery] string? startDate, [FromQuery] string? endDate, [FromQuery] string[]? status, [FromQuery] string[]? providers, [FromQuery] int startpage = 1, [FromQuery] int pageSize = 10)
+        public IActionResult GetbyMemberId(string lang ,[Required] int memberId, [FromQuery] string? startDate, [FromQuery] string? endDate, [FromQuery] string[]? status, [FromQuery] string[]? providers, [FromQuery] int startpage = 1, [FromQuery] int pageSize = 10)
         {
             if (ModelState.IsValid)
             {
@@ -136,12 +137,12 @@ namespace MediConsultMobileApi.Controllers
 
                 if (!memberExist)
                 {
-                    return NotFound(new MessageDto { Message = "Member Id not found" });
+                    return NotFound(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
                 }
                 if (requests is null)
                 {
-                    return NotFound(new MessageDto { Message = "Request not found" });
+                    return NotFound(new MessageDto { Message =Messages.RequestNotFound(lang) });
 
                 }
 
@@ -218,14 +219,14 @@ namespace MediConsultMobileApi.Controllers
         #region RequestByRequestId
         [HttpGet("RequestId")]
 
-        public async Task<IActionResult> GetResultByID([Required] int id)
+        public async Task<IActionResult> GetResultByID([Required] int id , string lang)
         {
             if (ModelState.IsValid)
             {
                 var request = await requestRepo.GetById(id);
                 if (request is null)
                 {
-                    return NotFound(new MessageDto { Message = $"Id  not found" });
+                    return NotFound(new MessageDto { Message = Messages.RequestNotFound(lang)});
                 }
               
                 string[] fileNames = Directory.GetFiles(request.Folder_path);

@@ -1,4 +1,5 @@
 ﻿using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Language;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,7 @@ namespace MediConsultMobileApi.Controllers
 
         [HttpGet("ProgramId")]
 
-        public async Task<IActionResult> GetByProgramId(int programId)
+        public async Task<IActionResult> GetByProgramId(int programId , string lang)
         {
             if (ModelState.IsValid)
             {
@@ -30,7 +31,7 @@ namespace MediConsultMobileApi.Controllers
               
                 if (serviceExists)
                 {
-                    return BadRequest("program id not found");
+                    return BadRequest(new MessageDto { Message = Messages.Policy(lang)});
                 }
                 var policyListDto = new List<PolicyDTO>();
                 foreach (var policy in policies)
