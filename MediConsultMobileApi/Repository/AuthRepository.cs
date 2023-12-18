@@ -7,6 +7,8 @@ using System.Net.Mail;
 using System.Net;
 using MediConsultMobileApi.Services;
 using MediConsultMobileApi.Language;
+using Microsoft.AspNetCore.Identity;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace MediConsultMobileApi.Repository
 {
@@ -18,9 +20,35 @@ namespace MediConsultMobileApi.Repository
         {
             this.dbContext = dbContext;
         }
+
+
+        #region GetClientBranchMemberById
+        public ClientBranchMember  GetById(int memberId)
+        {
+            return dbContext.clientBranchMembers.FirstOrDefault(m => m.member_id == memberId);
+        }
+
+        #endregion
+
+
+        #region Registeration
+
+        public async void Registeration(RegisterUserDto userDto , int memberId)
+        {
+            var member = GetById(memberId);
+
+            member.mobile = userDto.Mobile;
+            member.member_nid = userDto.NationalId;
+
+
+            dbContext.clientBranchMembers.Update(member);
+
+        }
+        #endregion
+
         #region Login
 
-      
+
         public async Task<MessageDto> Login(LoginUserDto userDto , string lang)
         {
             var authDto = new MessageDto();
@@ -56,19 +84,20 @@ namespace MediConsultMobileApi.Repository
 
         #endregion
 
+        #region ResetPassword
+
         public Login ResetPassword(int memberId)
         {
            return dbContext.logins.FirstOrDefault(m => m.member_id == memberId);
         }
 
-
-
+        #endregion
 
         #region SendOtp
 
         public  void SendOtp(string otp, int memberId)
         {
-            var member = ResetPassword(memberId);
+            Login member = ResetPassword(memberId);
             member.Otp = otp;
 
             dbContext.logins.Update(member);
@@ -94,6 +123,14 @@ namespace MediConsultMobileApi.Repository
 
         #endregion
 
+        #region SaveChange
+            public  void Save()
+            { 
 
-    }
+                dbContext.SaveChanges();
+
+            }
+         #endregion
+
+        }
 }

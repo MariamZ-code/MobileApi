@@ -301,6 +301,9 @@ namespace MediConsultMobileApi.Controllers
                     }
                 }
 
+                memberRepo.UpdateMember(memberDTO , id);
+                memberRepo.SaveDatabase();
+                
                 return Ok(new MessageDto { Message = Messages.MemberChange(lang) });
             }
             return BadRequest(ModelState);  

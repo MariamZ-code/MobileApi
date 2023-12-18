@@ -31,7 +31,7 @@
 
         public static string EnterMember(string language)
         {
-            return language == "ar" ? "ادخل الid" : "Enter member Id";
+            return language == "ar" ? "ادخل رقم المستخدم" : "Enter member Id";
         }
 
         // Email Validation
@@ -44,8 +44,12 @@
         {
             return language == "ar" ? "البريد الإلكتروني غير صالح" : "Email is not valid.";
         }
-       
+
         //Mobile Number Validation
+        public static string MobileNumberNotFound(string language)
+        {
+            return language == "ar" ? "لا يوجد رقم موبيل" : "Mobile number not found";
+        }
         public static string MobileNumber(string language)
         {
             return language == "ar" ? "رقم الجوال يجب أن يكون رقما" : "Mobile number must be number";
@@ -85,7 +89,7 @@
         }
         public static string SizeOfFile(string language)
         {
-            return language == "ar" ? "يجب أن يكون حجم الملف أقل من 5 ميجابايت." : "File size must be less than 5 MB.";
+            return language == "ar" ? "يجب أن يكون حجم الملف أقل من 5 ميجابايت" : "File size must be less than 5 MB.";
         }
         public static string FileExtension(string language)
         {
@@ -104,11 +108,11 @@
         }
         public static string NotificationSend(string language)
         {
-            return language == "ar" ? "تم إرسال الإشعار بنجاح  " : "Notification sent successfully";
+            return language == "ar" ? "تم إرسال الإشعار بنجاح" : "Notification sent successfully";
         }
         public static string NotificationImage(string language)
         {
-            return language == "ar" ? "الصور ليست عنوان URL" : "Imges not Url";
+            return language == "ar" ? "رابط الصورة غير صحيح" : "Imges not Url";
         }
 
 
@@ -119,7 +123,7 @@
         }
         public static string InvalidId (string language)
         {
-            return language == "ar" ? "بطاقة التعريف غير صالحة" : "Invalid Id";
+            return language == "ar" ? "رقم التعريف غير صالحة" : "Invalid Id";
         }
         public static string PasswordAndIdIncorrect(string language)
         {
@@ -140,7 +144,7 @@
         }
         public static string IncorrectOtp(string language)
         {
-            return language == "ar" ? "غير صحيح OTP " : "Otp is incorrect";
+            return language == "ar" ? "غير صحيح OTP" : "Otp is incorrect";
         }
         public static string DeliveredOtp(string language)
         {

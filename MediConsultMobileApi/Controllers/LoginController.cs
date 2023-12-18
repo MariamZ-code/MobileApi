@@ -14,6 +14,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using static System.Net.WebRequestMethods;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MediConsultMobileApi.Controllers
@@ -36,12 +37,113 @@ namespace MediConsultMobileApi.Controllers
             this.memberRepo = memberRepo;
             this.validation = validation;
         }
+
+        #region GenerateOtp
+        private string GenerateOtp()
+        {
+            // Implement your OTP generation logic (e.g., generate a random 6-digit OTP)
+            Random random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
+        #endregion
+        #region Registeration
+
+        [HttpPut("Registeration")]
+
+        public async Task<IActionResult> Registeration(RegisterUserDto userDto , int id , string lang )
+        {
+            if (ModelState.IsValid)
+            {
+                var memberExists = memberRepo.MemberExists(id);
+                if (!memberExists)
+                {
+
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+
+                }
+                var memberLoginExists = authRepo.MemberLoginExists(id);
+                if (!memberLoginExists)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+
+                }
+                var existingMemberWithSameMobile = memberRepo.GetMemberByMobile(userDto.Mobile);
+         
+                var existingMemberWithSameNationalId = memberRepo.GetMemberByNationalId(userDto.NationalId);
+
+                if (userDto.NationalId is not null)
+                {
+
+                    if (!long.TryParse(userDto.NationalId, out _))
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.NationalIdNumber(lang) });
+
+
+                    }
+                    if (userDto.NationalId.Length != 14)
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.NationalIdFormat(lang) });
+
+
+                    }
+                    if (existingMemberWithSameNationalId != null && existingMemberWithSameNationalId.member_id != id)
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.NationalIdExist(lang) });
+
+                    }
+                }
+
+                if (userDto.Mobile is not null)
+                {
+                    if (!long.TryParse(userDto.Mobile, out _))
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.MobileNumber(lang) });
+
+
+                    }
+                    if (!userDto.Mobile.StartsWith("01"))
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.MobileStartWith(lang) });
+
+                    }
+                    if (userDto.Mobile.Length != 11)
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.MobileNumberFormat(lang) });
+
+                    }
+
+                    if (existingMemberWithSameMobile != null && existingMemberWithSameMobile.member_id != id)
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.MobileNumbeExist(lang) });
+
+                    }
+
+
+                }
+
+
+                authRepo.Registeration(userDto, id);
+          
+                authRepo.Save();
+                return Ok("Done");
+
+            }
+            return BadRequest(ModelState);
+        }
+
+        #endregion
+
         #region Login
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginUserDto userDto, string lang)
         {
+            var memberExists = memberRepo.MemberExists(int.Parse(userDto.Id));
+            if (!memberExists)
+            {
+                return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
+            }
             if (userDto.Id == string.Empty || userDto.Password == string.Empty)
             {
                 return BadRequest(new MessageDto { Message = Messages.PasswordAndIdRequired(lang) });
@@ -64,14 +166,7 @@ namespace MediConsultMobileApi.Controllers
         }
         #endregion
 
-        #region GenerateOtp
-        private string GenerateOtp()
-        {
-            // Implement your OTP generation logic (e.g., generate a random 6-digit OTP)
-            Random random = new Random();
-            return random.Next(100000, 999999).ToString();
-        }
-        #endregion
+      
 
 
 
@@ -83,6 +178,12 @@ namespace MediConsultMobileApi.Controllers
             if (ModelState.IsValid)
             {
                 var member = authRepo.ResetPassword(memberId);
+                var memberExists = memberRepo.MemberExists(memberId);
+                if (!memberExists)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+
+                }
                 var memberMobile = memberRepo.GetByID(memberId).Result.mobile;
                 if (member is null)
                 {
@@ -92,7 +193,7 @@ namespace MediConsultMobileApi.Controllers
                 }
                 if (memberMobile is null || memberMobile == string.Empty)
                 {
-                    return BadRequest("Mobile number not found");
+                    return BadRequest(new MessageDto { Message = Messages.MobileNumberNotFound(lang) });
 
                 }
                 if (!memberMobile.StartsWith("01"))
@@ -107,7 +208,7 @@ namespace MediConsultMobileApi.Controllers
                 }
 
                 string otp = GenerateOtp();
-                string url = $"http://52.28.71.183/sms_api/Message/SendSMS?text={otp}&mobile={memberMobile}";
+                string url = $"https://hcms.mediconsulteg.com/sms_api/Message/SendSMS?text={otp}&mobile={memberMobile}";
                 using (var client = new HttpClient())
                 {
                     var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
@@ -142,7 +243,19 @@ namespace MediConsultMobileApi.Controllers
         public IActionResult SendEmail(int memberId , string lang)
         {
             var member = authRepo.ResetPassword(memberId);
+            var memberExists = memberRepo.MemberExists(memberId);
+            if (!memberExists)
+            {
+                return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+
+            }
             var memberEmail = memberRepo.GetByID(memberId).Result.email;
+            if (member is null)
+            {
+                return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+
+
+            }
 
             if (memberEmail is not null)
             {
@@ -234,6 +347,8 @@ namespace MediConsultMobileApi.Controllers
         }
 
         #endregion
+    
+    
     }
 
 }

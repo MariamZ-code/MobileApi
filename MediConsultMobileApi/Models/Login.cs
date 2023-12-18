@@ -20,6 +20,8 @@ namespace MediConsultMobileApi.Models
         // TODO : Add Column to DB
         public string? firebase_token { get; set; }
 
+        // TODO : Add Column to DB
+
         [JsonIgnore]
         public string? Otp { get; set; }
 
