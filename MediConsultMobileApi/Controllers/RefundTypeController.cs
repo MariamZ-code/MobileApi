@@ -1,4 +1,5 @@
 ﻿using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Language;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,21 +27,27 @@ namespace MediConsultMobileApi.Controllers
 
                 var member = await memberRepo.GetByID(memberId); // member
 
+                var memberExists = memberRepo.MemberExists(memberId);
+
+                if (!memberExists)
+                {
+
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+
+                }
+
                 var refundTypes = await refundTypeRepo.GetRefundTypeByOnProgram(member.program_id); // onProgram==1
                 var refundTypesByPolicy = await refundTypeRepo.GetRefundTypeByOnPolicy(member.policy_id); // onProgram==0
-                var refundTypesEn = new List<RefundTypeDTO>();
-                var refundTypesAr = new List<RefundTypeDTO>();
+                var refundTypesEn = new List<RefundTypeEnDTO>();
+                var refundTypesAr = new List<RefundTypeArDTO>();
                 if (lang == "en")
                 {
                     foreach (var refundType in refundTypes)
                     {
 
-                                RefundTypeDTO refundTypeEnDTO = new RefundTypeDTO
+                                RefundTypeEnDTO refundTypeEnDTO = new RefundTypeEnDTO
                                 {
-                                    //ar_name = refundType.reimbursementType.ar_name,
                                     en_name = refundType.reimbursementType.en_name,
-                                    program_id = refundType.program_id,
-                                    is_on_program = refundType.is_on_program,
                                 };
 
                                 refundTypesEn.Add(refundTypeEnDTO);
@@ -48,12 +55,10 @@ namespace MediConsultMobileApi.Controllers
                      }
                     foreach (var refundType in refundTypesByPolicy)
                     {
-                        RefundTypeDTO refundTypeEnDTO = new RefundTypeDTO
+                        RefundTypeEnDTO refundTypeEnDTO = new RefundTypeEnDTO
                         {
-                            //ar_name = refundType.reimbursementType.ar_name,
                             en_name = refundType.reimbursementType.en_name,
-                            program_id = refundType.program_id,
-                            is_on_program = refundType.is_on_program,
+                          
                         };
 
                         refundTypesEn.Add(refundTypeEnDTO);
@@ -64,12 +69,10 @@ namespace MediConsultMobileApi.Controllers
                 foreach (var refundType in refundTypes)
                 {
                    
-                        RefundTypeDTO refundTypeArDTO = new RefundTypeDTO
+                        RefundTypeArDTO refundTypeArDTO = new RefundTypeArDTO
                         {
                             ar_name = refundType.reimbursementType.ar_name,
-                            //en_name = refundType.reimbursementType.en_name,
-                            program_id = refundType.program_id,
-                            is_on_program = refundType.is_on_program,
+                         
                         };
 
                         refundTypesAr.Add(refundTypeArDTO);
@@ -78,15 +81,13 @@ namespace MediConsultMobileApi.Controllers
                 }
                 foreach (var refundType in refundTypesByPolicy)
                 {
-                    RefundTypeDTO refundTypeEnDTO = new RefundTypeDTO
+                    RefundTypeArDTO refundTypeArDTO = new RefundTypeArDTO
                     {
-                        //ar_name = refundType.reimbursementType.ar,
                         ar_name = refundType.reimbursementType.ar_name,
-                        program_id = refundType.program_id,
-                        is_on_program = refundType.is_on_program,
+                       
                     };
 
-                    refundTypesEn.Add(refundTypeEnDTO);
+                    refundTypesAr.Add(refundTypeArDTO);
                 }
                 return Ok(refundTypesAr);
 
