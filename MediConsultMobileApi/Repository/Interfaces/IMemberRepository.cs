@@ -5,6 +5,7 @@ namespace MediConsultMobileApi.Repository.Interfaces
 {
     public interface IMemberRepository
     {
+        (string date, string gender) CreateDateAndGender(string ssn);
         bool MemberExists(int? memberId);
         bool SSNExists(string nId);
         bool PhoneExists(string mobile);

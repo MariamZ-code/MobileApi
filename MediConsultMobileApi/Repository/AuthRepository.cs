@@ -15,10 +15,12 @@ namespace MediConsultMobileApi.Repository
     public class AuthRepository : IAuthRepository
     {
         private readonly ApplicationDbContext dbContext;
+        private readonly IMemberRepository memberRepo;
 
-        public AuthRepository(ApplicationDbContext dbContext)
+        public AuthRepository(ApplicationDbContext dbContext , IMemberRepository memberRepo)
         {
             this.dbContext = dbContext;
+            this.memberRepo = memberRepo;
         }
 
 
@@ -33,15 +35,21 @@ namespace MediConsultMobileApi.Repository
 
         #region Registeration
 
-        public async void Registeration(RegisterUserDto userDto , int memberId)
+        public async void Registeration(RegisterUserDto userDto, int memberId)
         {
             var member = GetById(memberId);
+            var createDateAndGender = memberRepo.CreateDateAndGender(userDto.NationalId);
 
             member.mobile = userDto.Mobile;
             member.member_nid = userDto.NationalId;
+            member.member_birthday = createDateAndGender.date;
+            member.member_gender = createDateAndGender.gender;
 
+            var memberPassword = ResetPassword(memberId);
+            memberPassword.the_password = userDto.Password;
 
             dbContext.clientBranchMembers.Update(member);
+            dbContext.logins.Update(memberPassword);
 
         }
         #endregion

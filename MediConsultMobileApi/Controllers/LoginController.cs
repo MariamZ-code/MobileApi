@@ -50,11 +50,13 @@ namespace MediConsultMobileApi.Controllers
 
         [HttpPut("Registeration")]
 
-        public async Task<IActionResult> Registeration(RegisterUserDto userDto , int id , string lang )
+        public async Task<IActionResult> Registeration(RegisterUserDto userDto , int id , string lang  )
         {
             if (ModelState.IsValid)
             {
                 var memberExists = memberRepo.MemberExists(id);
+                var member = authRepo.ResetPassword(id);
+
                 if (!memberExists)
                 {
 
@@ -71,27 +73,6 @@ namespace MediConsultMobileApi.Controllers
          
                 var existingMemberWithSameNationalId = memberRepo.GetMemberByNationalId(userDto.NationalId);
 
-                if (userDto.NationalId is not null)
-                {
-
-                    if (!long.TryParse(userDto.NationalId, out _))
-                    {
-                        return BadRequest(new MessageDto { Message = Messages.NationalIdNumber(lang) });
-
-
-                    }
-                    if (userDto.NationalId.Length != 14)
-                    {
-                        return BadRequest(new MessageDto { Message = Messages.NationalIdFormat(lang) });
-
-
-                    }
-                    if (existingMemberWithSameNationalId != null && existingMemberWithSameNationalId.member_id != id)
-                    {
-                        return BadRequest(new MessageDto { Message = Messages.NationalIdExist(lang) });
-
-                    }
-                }
 
                 if (userDto.Mobile is not null)
                 {
@@ -120,7 +101,36 @@ namespace MediConsultMobileApi.Controllers
 
 
                 }
+                if (userDto.NationalId is not null)
+                {
 
+                    if (!long.TryParse(userDto.NationalId, out _))
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.NationalIdNumber(lang) });
+
+
+                    }
+                    if (userDto.NationalId.Length != 14)
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.NationalIdFormat(lang) });
+
+
+                    }
+                    if (existingMemberWithSameNationalId != null && existingMemberWithSameNationalId.member_id != id)
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.NationalIdExist(lang) });
+
+                    }
+                }
+
+                if (userDto.Otp != member.Otp)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.IncorrectOtp(lang) });
+                }
+                if (userDto.ConfirmPassword != userDto.Password)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.PasswordAndConfirmPassword(lang) });
+                }
 
                 authRepo.Registeration(userDto, id);
           
@@ -314,27 +324,20 @@ namespace MediConsultMobileApi.Controllers
                 if (member is null)
                 {
                     return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
-
-
                 }
 
                 if (member.member_id != id)
                 {
                     return BadRequest(new MessageDto { Message = Messages.IncorrectId(lang) });
 
-
                 }
                 if (otp != member.Otp)
                 {
                     return BadRequest(new MessageDto { Message = Messages.IncorrectOtp(lang) });
-                   
-
                 }
                 if (changeDto.ConfirmPassword != changeDto.Password)
                 {
-
                     return BadRequest(new MessageDto { Message = Messages.PasswordAndConfirmPassword(lang) });
-            
                 }
 
                 authRepo.ChangePass(otp, id, changeDto);
