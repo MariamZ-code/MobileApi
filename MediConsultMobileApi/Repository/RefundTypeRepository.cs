@@ -17,9 +17,15 @@ namespace MediConsultMobileApi.Repository
             return await dbContext.ClientPriceLists.Include(t => t.reimbursementType).AsNoTracking().ToListAsync();
 
         }
-        public async Task<List<ClientPriceList>> GetRefundTypeByOnProgram()
+        public async Task<List<ClientPriceList>> GetRefundTypeByOnProgram(int? program_id)
         {
-            return await dbContext.ClientPriceLists.Include(t => t.reimbursementType).Where(p=> p.is_on_program == 0).AsNoTracking().ToListAsync();
+            return await dbContext.ClientPriceLists.Include(t => t.reimbursementType).Where(p=> p.is_on_program == 1 && p.program_id== program_id).AsNoTracking().ToListAsync();
         }
+
+        public async Task<List<ClientPriceList>> GetRefundTypeByOnPolicy(int? policy_id)
+        {
+            return await dbContext.ClientPriceLists.Include(t => t.reimbursementType).Where(p => p.is_on_program == 0 && p.policy_id == policy_id).AsNoTracking().ToListAsync();
+        }
+
     }
 }
