@@ -155,7 +155,7 @@ namespace MediConsultMobileApi.Controllers
 
 
         #region UpdateMember
-        [HttpPut]
+        [HttpPost]
         public async Task<IActionResult> UpdateMember([FromForm] UpdateMemberDTO memberDTO, [Required] int id, string lang)
         {
             if (ModelState.IsValid)

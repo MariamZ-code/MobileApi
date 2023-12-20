@@ -27,7 +27,7 @@ namespace MediConsultMobileApi.Controllers
 
                 var member = await memberRepo.GetByID(memberId); // member
 
-                var memberExists = memberRepo.MemberExists(memberId);
+                var memberExists = memberRepo.MemberExists(memberId); 
 
                 if (!memberExists)
                 {

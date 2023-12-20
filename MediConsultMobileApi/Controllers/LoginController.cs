@@ -48,7 +48,7 @@ namespace MediConsultMobileApi.Controllers
         #endregion
         #region Registeration
 
-        [HttpPut("Registeration")]
+        [HttpPost("Registeration")]
 
         public async Task<IActionResult> Registeration(RegisterUserDto userDto , int id , string lang  )
         {
