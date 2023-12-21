@@ -1,4 +1,5 @@
 ﻿using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Language;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +24,7 @@ namespace MediConsultMobileApi.Controllers
 
         #region AddNewRefund
         [HttpPost("AddNewRefund")]
-        public async Task<IActionResult> PostRefund([FromForm] RefundDTO refundDto, [FromForm] List<IFormFile> files)
+        public async Task<IActionResult> PostRefund([FromForm] RefundDTO refundDto, [FromForm] List<IFormFile> files , string lang)
         {
 
             const long maxSizeBytes = 5 * 1024 * 1024;
@@ -31,24 +32,45 @@ namespace MediConsultMobileApi.Controllers
             {
 
                 var memberExists = memberRepo.MemberExists(refundDto.member_id);
-              
+                var refundExists = await refundRepo.RefundExists(refundDto.refund_id);
+
+
                 if (refundDto.member_id is null)
                 {
-                    return BadRequest(new MessageDto { Message = "Enter member Id" });
+                    return BadRequest(new MessageDto { Message = Messages.EnterMember(lang) });
                 }
 
                 if (!memberExists)
                 {
-                    return BadRequest(new MessageDto { Message = "Member Id not found" });
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
                 }
-
+                if (!refundExists)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.RefundNotFound(lang) });
+                }
+                if (refundDto.amount is null)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.AmountNotFound(lang) });
+                }
+                if (refundDto.refund_id is null)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.EnterRefund(lang) });
+                }
+                if (refundDto.refund_date is null)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.EnterRefundDate(lang) });
+                }
+                if (refundDto.refund_date == DateTime.Now.ToString("dd-MM-yyyy"))
+                {
+                    return BadRequest(new MessageDto { Message = Messages.RefundDateIncorrect(lang) });
+                }
                 var serverPath = AppDomain.CurrentDomain.BaseDirectory;
 
                 string[] validExtensions = { ".pdf", ".jpg", ".jpeg", ".png" };
                 if (files.Count == 0)
                 {
-                    return BadRequest(new MessageDto { Message = "Please uploade File " });
+                    return BadRequest(new MessageDto { Message =Messages.NoFileUploaded(lang)});
 
                 }
                 for (int j = 0; j < files.Count; j++)
@@ -56,11 +78,11 @@ namespace MediConsultMobileApi.Controllers
 
                     if (files[j].Length == 0)
                     {
-                        return BadRequest("No file uploaded.");
+                        return BadRequest(new MessageDto { Message = Messages.NoFileUploaded(lang) });
                     }
                     if (files[j].Length >= maxSizeBytes)
                     {
-                        return BadRequest($"File size must be less than 5 MB.");
+                        return BadRequest(new MessageDto { Message = Messages.SizeOfFile(lang) });
                     }
                     // image.png --0
                     switch (Path.GetExtension(files[j].FileName))
@@ -71,11 +93,11 @@ namespace MediConsultMobileApi.Controllers
                         case ".jpeg":
                             break;
                         default:
-                            return BadRequest(new MessageDto { Message = "Folder Path must end with extension .jpg, .png, or .jpeg" });
+                            return BadRequest(new MessageDto { Message = Messages.FileExtension(lang) });
                     }
                 }
                 var refund = refundRepo.AddRefund(refundDto);
-                var folder = Path.Combine(serverPath, "MemberPortalApp", refundDto.member_id.ToString(), "Approvals", refund.id.ToString());
+                var folder = Path.Combine(serverPath, "MemberPortalApp", refundDto.member_id.ToString(), "Refund", refund.id.ToString());
 
                 for (int i = 0; i < files.Count; i++)
                 {
@@ -108,7 +130,7 @@ namespace MediConsultMobileApi.Controllers
         #region RefundByMemberId
         [HttpGet("HistoryRefund")]
 
-        public IActionResult GetbyMemberId([Required] int memberId, [FromQuery] string? startDate, [FromQuery] string? endDate, [FromQuery] string[]? status, [FromQuery] string[]? providers, [FromQuery] int startpage = 1, [FromQuery] int pageSize = 10)
+        public IActionResult GetbyMemberId(string lang ,[Required] int memberId, [FromQuery] string? startDate, [FromQuery] string? endDate, [FromQuery] string[]? status, [FromQuery] string[]? refundTypes, [FromQuery] int startpage = 1, [FromQuery] int pageSize = 10 )
         {
             if (ModelState.IsValid)
             {
@@ -120,12 +142,12 @@ namespace MediConsultMobileApi.Controllers
 
                 if (!memberExist)
                 {
-                    return NotFound(new MessageDto { Message = "Member Id not found" });
+                    return NotFound(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
                 }
                 if (refunds is null)
                 {
-                    return NotFound(new MessageDto { Message = "Request not found" });
+                    return NotFound(new MessageDto { Message = Messages.RefundNotFound(lang) });
 
                 }
 
@@ -152,20 +174,32 @@ namespace MediConsultMobileApi.Controllers
                                entityDate <= endDat)
                         .AsQueryable();
                 }
+                if (refundTypes != null && refundTypes.Any())
+                {
+                    for (int i = 0; i < refundTypes.Length; i++)
+                    {
+                        var provider = refundTypes[i];
+                        refunds = refunds.Where(r => r.clientPriceList.reimbursementType.en_name.Contains(provider));
+                    }
+
+
+                }
                 var totalProviders = refunds.Count();
                 refunds = refunds.Skip((startpage - 1) * pageSize).Take(pageSize);
                 foreach (var refund in refunds)
                 {
-
 
                     RefundDetailsForMemberDTO refDetalisDto = new RefundDetailsForMemberDTO
                     {
 
                         Id = refund.id,
                         CreatedDate = refund.created_date,
-                        //RefundType = refund.Provider.Provider_name_en,
-                        Status = refund.Status
-
+                        RefundDate = refund.refund_date,
+                        Status = refund.Status,
+                        Amount = refund.total_amount, 
+                        Note = refund.notes,
+                        //RefundType = refund.clientPriceList.reimbursementType.en_name
+                        
                     };
 
                     refDto.Add(refDetalisDto);
@@ -193,14 +227,14 @@ namespace MediConsultMobileApi.Controllers
         #region RefundByRefundId
         [HttpGet("RefundDetails")]
 
-        public async Task<IActionResult> GetResultByID([Required] int id)
+        public async Task<IActionResult> GetResultByID([Required] int id , string lang)
         {
             if (ModelState.IsValid)
             {
                 var refund = await refundRepo.GetById(id);
                 if (refund is null)
                 {
-                    return NotFound(new MessageDto { Message = $"Id  not found" });
+                    return NotFound(new MessageDto { Message = Messages.RefundNotFound(lang)});
                 }
 
                 var reqDto = new RefundDetailsDTO
@@ -208,7 +242,6 @@ namespace MediConsultMobileApi.Controllers
                     Id = refund.id,
                     RefundId = refund.refund_id,
                     Refund_date = refund.refund_date,
-                    RefundType = null,
                     Notes = refund.notes
 
 

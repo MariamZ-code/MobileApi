@@ -30,6 +30,7 @@ namespace MediConsultMobileApi.Repository
                 Provider_id = requestDto.Provider_id,
                 Notes = requestDto.Notes,
                 Member_id = requestDto.Member_id,
+                
             };
 
             dbContext.Add(request);

@@ -7,6 +7,7 @@
         {
             return language == "ar" ? "المستخدم غير موجود" : "Member not found";
         }
+      
         public static string MemberArchive(string language)
         {
             return language == "ar" ? "الحساب معطل" : "User in Archive";
@@ -187,5 +188,28 @@
             return language == "ar" ? "لم يتم العثور على الطلب" : "Request not found";
         }
 
+
+        // Refund
+
+        public static string RefundNotFound(string language)
+        {
+            return language == "ar" ? "لم يتم العثور على طلب استرداد الأموال" : "Refund  not found";
+        }
+        public static string AmountNotFound(string language)
+        {
+            return language == "ar" ? "المبلغ الإجمالي مطلوب" : "Total Amount is required";
+        }
+        public static string EnterRefund(string language)
+        {
+            return language == "ar" ? "أدخل معرف الاسترداد" : "Enter Refund id";
+        }
+        public static string EnterRefundDate(string language)
+        {
+            return language == "ar" ? "أدخل تاريخ الاسترداد" : "Enter Refund Date";
+        }
+        public static string RefundDateIncorrect(string language)
+        {
+            return language == "ar" ? " تاريخ الاسترداد خطأ" : " Refund Date incorrect";
+        }
     }
 }

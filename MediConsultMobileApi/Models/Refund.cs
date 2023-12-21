@@ -10,7 +10,7 @@ namespace MediConsultMobileApi.Models
         public int id { get; set; }
 
 
-        public string notes { get; set; }
+        public string? notes { get; set; }
 
         [MaxLength(50)]
         public string? created_date { get; set; } = DateTime.Now.ToString("dd-MM-yyyy");
@@ -26,7 +26,9 @@ namespace MediConsultMobileApi.Models
         [MaxLength(100)]
         public string? Status { get; set; } = "Pending";
 
+        [ForeignKey("clientPriceList")]
         public int? refund_id { get; set; }
+        public virtual ClientPriceList? clientPriceList { get; set; }
 
         public int? Is_pharma { get; set; } = 0;
 

@@ -19,15 +19,21 @@ namespace MediConsultMobileApi.Repository
 
             var refund = new Refund
             {
+
                 refund_id= refunddto.refund_id,
                 notes = refunddto.notes,
                 member_id = refunddto.member_id,
+                refund_date = refunddto.refund_date,
+                total_amount = refunddto.amount
+                
+                
             };
             dbContext.Add(refund);
 
             dbContext.SaveChanges();
 
-            var folder = Path.Combine(serverPath, "MemberPortalApp", refund.refund_id.ToString(), "Approvals", refund.id.ToString());
+            var folder = Path.Combine(serverPath, "MemberPortalApp", refunddto.member_id.ToString(), "Refund", refund.id.ToString());
+
 
             refund.folder_path = folder;
 
@@ -59,7 +65,12 @@ namespace MediConsultMobileApi.Repository
         }
         #endregion
 
-     
+        #region RefundExists
+        public async Task<bool> RefundExists(int? refundId)
+        {
+            return await dbContext.ClientPriceLists.AnyAsync(p => p.id == refundId);
+        }
 
+        #endregion
     }
 }

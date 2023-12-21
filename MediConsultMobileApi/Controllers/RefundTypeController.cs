@@ -47,6 +47,7 @@ namespace MediConsultMobileApi.Controllers
 
                                 RefundTypeEnDTO refundTypeEnDTO = new RefundTypeEnDTO
                                 {
+                                    id = refundType.id,
                                     en_name = refundType.reimbursementType.en_name,
                                 };
 
@@ -57,6 +58,7 @@ namespace MediConsultMobileApi.Controllers
                     {
                         RefundTypeEnDTO refundTypeEnDTO = new RefundTypeEnDTO
                         {
+                                    id = refundType.id,
                             en_name = refundType.reimbursementType.en_name,
                           
                         };
@@ -71,6 +73,8 @@ namespace MediConsultMobileApi.Controllers
                    
                         RefundTypeArDTO refundTypeArDTO = new RefundTypeArDTO
                         {
+                            id = refundType.id,
+
                             ar_name = refundType.reimbursementType.ar_name,
                          
                         };
@@ -83,6 +87,8 @@ namespace MediConsultMobileApi.Controllers
                 {
                     RefundTypeArDTO refundTypeArDTO = new RefundTypeArDTO
                     {
+                        id = refundType.id,
+
                         ar_name = refundType.reimbursementType.ar_name,
                        
                     };

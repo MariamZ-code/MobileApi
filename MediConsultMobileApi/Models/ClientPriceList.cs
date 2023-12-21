@@ -19,7 +19,7 @@ namespace MediConsultMobileApi.Models
         [ForeignKey("reimbursementType")]
         public int? type_id { get; set; }
 
-        public ReimbursementType reimbursementType { get; set; }
+        public virtual ReimbursementType? reimbursementType { get; set; }
         public int? policy_id { get; set; }
         public int? is_on_pricelist { get; set; }
         public double? max_value { get; set; }

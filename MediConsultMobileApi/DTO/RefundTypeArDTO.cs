@@ -2,6 +2,8 @@
 {
     public class RefundTypeArDTO
     {
+        public int id { get; set; }
+
         public string? ar_name { get; set; }
    
     }
