@@ -21,7 +21,7 @@ namespace MediConsultMobileApi.Repository
             {
 
                 refund_id= refunddto.refund_id,
-                notes = refunddto.notes,
+                notes = refunddto.notes, 
                 member_id = refunddto.member_id,
                 refund_date = refunddto.refund_date,
                 total_amount = refunddto.amount
