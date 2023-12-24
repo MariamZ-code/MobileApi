@@ -218,6 +218,7 @@ namespace MediConsultMobileApi.Controllers
                 }
 
                 string otp = GenerateOtp();
+                
                 string url = $"https://hcms.mediconsulteg.com/sms_api/Message/SendSMS?text={otp}&mobile={memberMobile}";
                 using (var client = new HttpClient())
                 {
