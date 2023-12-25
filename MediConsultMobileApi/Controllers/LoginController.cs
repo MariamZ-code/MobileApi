@@ -135,7 +135,7 @@ namespace MediConsultMobileApi.Controllers
                 authRepo.Registeration(userDto, id);
           
                 authRepo.Save();
-                return Ok("Done");
+                return Ok(new MessageDto { Message = Messages.SuccessRegestration(lang) });
 
             }
             return BadRequest(ModelState);

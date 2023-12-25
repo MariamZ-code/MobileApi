@@ -209,7 +209,11 @@
         }
         public static string RefundDateIncorrect(string language)
         {
-            return language == "ar" ? " تاريخ الاسترداد خطأ" : " Refund Date incorrect";
+            return language == "ar" ? " تاريخ الاسترداد خطأ" : "Refund Date incorrect";
+        }
+        public static string SuccessRegestration(string language)
+        {
+            return language == "ar" ? "تم التسجيل بنجاح" : "Successfully registered";
         }
     }
 }
