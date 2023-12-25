@@ -370,7 +370,7 @@ namespace MediConsultMobileApi.Controllers
 
         #region ChangePassword
 
-        [HttpPut("ChangePassword")]
+        [HttpPost("ChangePassword")]
         public IActionResult ChangePassword([Required][FromQuery] string otp, ChangePasswordDTO changeDto, [Required] int id , string lang)
         {
             if (ModelState.IsValid)
