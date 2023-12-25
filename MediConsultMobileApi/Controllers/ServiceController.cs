@@ -1,4 +1,5 @@
 ﻿using MediConsultMobileApi.DTO;
+using MediConsultMobileApi.Language;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -25,57 +26,79 @@ namespace MediConsultMobileApi.Controllers
 
             if (ModelState.IsValid)
             {
-                var member = await memberRepo.GetByID(id); // member 
-                var valid = await memberRepo.validation(member); // msg 
-                if (valid.Message is null)
+                var member = await memberRepo.GetByID(id); // member
+                var memberExists = memberRepo.MemberExists(id);
+                var services = await serviceRepo.GetById(member);
+                var serviceEn = new List<ServiceEnDTO>();
+                var serviceAr = new List<ServiceArDTO>();
+
+                if (!memberExists)
                 {
-                    var services = await serviceRepo.GetById(member);
-                    var serviceEn = new List<ServiceEnDTO>();
-                    var serviceAr = new List<ServiceArDTO>();
-                    if (lang == "en")
-                    {
-                        foreach (var service in services)
-                        {
-                            ServiceEnDTO serviceEnDto = new ServiceEnDTO
-                            {
 
-                              program_id = service.program_id,
-                              service_nameEn = service.service_nameEn,
-                              copayment = service.copayment
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
-                            };
+                }
 
-                            serviceEn.Add(serviceEnDto);
+                if (member is null)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
-                        }
-                        return Ok(serviceEn);
+                }
+                if (member.program_name is null)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MemberArchive(lang) });
+                }
+                if (member.member_status == "Deactivated")
+                {
 
-                    }
+
+                    return BadRequest(new MessageDto { Message = Messages.MemberDeactivated(lang) });
+
+                }
+                if (member.member_status == "Hold")
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MemberHold(lang) });
+
+                }
+                if (lang == "en")
+                {
                     foreach (var service in services)
                     {
-                        ServiceArDTO serviceArDto = new ServiceArDTO
+                        ServiceEnDTO serviceEnDto = new ServiceEnDTO
                         {
 
                             program_id = service.program_id,
-                            service_nameAr = service.service_nameAr,
+                            service_nameEn = service.service_nameEn,
                             copayment = service.copayment
 
                         };
 
-                        serviceAr.Add(serviceArDto);
+                        serviceEn.Add(serviceEnDto);
 
                     }
-                    return Ok(serviceAr);
+                    return Ok(serviceEn);
 
                 }
+                foreach (var service in services)
+                {
+                    ServiceArDTO serviceArDto = new ServiceArDTO
+                    {
 
+                        program_id = service.program_id,
+                        service_nameAr = service.service_nameAr,
+                        copayment = service.copayment
 
-                return Ok(valid.Message);
+                    };
 
-            }
+                    serviceAr.Add(serviceArDto);
+
+                }
+                return Ok(serviceAr);    
+
+        }
             return BadRequest(ModelState);
 
 
-        }
     }
+}
 }
