@@ -26,18 +26,15 @@ namespace MediConsultMobileApi.Controllers
 
             if (ModelState.IsValid)
             {
-                var member = await memberRepo.GetByID(id); // member
                 var memberExists = memberRepo.MemberExists(id);
-                var services = await serviceRepo.GetById(member);
-                var serviceEn = new List<ServiceEnDTO>();
-                var serviceAr = new List<ServiceArDTO>();
+              
 
                 if (!memberExists)
                 {
-
                     return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
-
                 }
+                var member = await memberRepo.GetByID(id); // member
+               
 
                 if (member is null)
                 {
@@ -60,6 +57,9 @@ namespace MediConsultMobileApi.Controllers
                     return BadRequest(new MessageDto { Message = Messages.MemberHold(lang) });
 
                 }
+                var services = await serviceRepo.GetById(member);
+                var serviceEn = new List<ServiceEnDTO>();
+                var serviceAr = new List<ServiceArDTO>();
                 if (lang == "en")
                 {
                     foreach (var service in services)
