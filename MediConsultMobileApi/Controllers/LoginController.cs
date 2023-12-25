@@ -143,6 +143,61 @@ namespace MediConsultMobileApi.Controllers
 
         #endregion
 
+
+        #region SendOTPSMS
+
+        [HttpGet("SendOTPSMS")]
+        public async Task<IActionResult> SendOTPSMS(string mobileNum,int memberId, string lang)
+        {
+            if (ModelState.IsValid)
+            {
+                
+                if (mobileNum is null || mobileNum == string.Empty)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MobileNumberNotFound(lang) });
+
+                }
+                if (!mobileNum.StartsWith("01"))
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MobileStartWith(lang) });
+
+                }
+                if (mobileNum.Length != 11)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MobileNumberFormat(lang) });
+
+                }
+
+                string otp = GenerateOtp();
+
+                string url = $"https://hcms.mediconsulteg.com/sms_api/Message/SendSMS?text={otp}&mobile={mobileNum}";
+                using (var client = new HttpClient())
+                {
+                    var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
+
+                    client.DefaultRequestHeaders.Accept.Clear();
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    //GET Method
+                    HttpResponseMessage response = await client.PostAsync(url, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        authRepo.SendOtp(otp, memberId);
+
+                        return Ok(new MessageDto { Message = Messages.DeliveredOtp(lang) });
+
+                    }
+                    else
+                    {
+                        return BadRequest(response.StatusCode);
+                    }
+                }
+
+            }
+            return BadRequest(ModelState);
+        }
+        #endregion
+
         #region Login
 
         [HttpPost("Login")]
