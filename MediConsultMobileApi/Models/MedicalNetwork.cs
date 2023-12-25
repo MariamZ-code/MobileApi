@@ -13,9 +13,19 @@ namespace MediConsultMobileApi.Models
         public string? Hotline { get; set; }
         public string? Mobile { get; set; }
         public string? Telephone { get; set; }
+
         public string Provider_name { get; set; }
-        public string provider_name_en { get; set; }
+
+        // TODO : Add new column 
+        public string provider_name_en { get; set; } 
+        
+        // TODO : Add new column 
+        public string Category_Name_En { get; set; }
         public string? Speciality { get; set; }
+
+        // TODO : Add new column 
+        // TODO : Add new culumn provider_speciality_name_view
+        public string? General_Specialty_Name_En { get; set; }
         public string Category { get; set; }
     }
 }

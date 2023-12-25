@@ -1,8 +1,10 @@
 ﻿using MediConsultMobileApi.DTO;
 using MediConsultMobileApi.Language;
+using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.NetworkInformation;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace MediConsultMobileApi.Controllers
@@ -19,46 +21,120 @@ namespace MediConsultMobileApi.Controllers
         }
         [HttpGet]
 
-        public IActionResult MedicalNetwork([FromQuery] string? providerName, string lang, [FromQuery] string[]? categories , int StartPage = 1, int pageSize = 10 )
+        public IActionResult MedicalNetwork([FromQuery] string? providerName, string lang, [FromQuery] string[]? categories, int StartPage = 1, int pageSize = 10)
         {
 
             if (ModelState.IsValid)
             {
-                var medicalNet = medicalRepo.GetAll();
-                if (providerName is not null)
-                {
-                    medicalNet = medicalNet.Where(x => x.Provider_name.Contains(providerName));
-                }
-                if (categories != null && categories.Any())
-                {
-                    for (int i = 0; i < categories.Length; i++)
-                    {
-                        var status = categories[i];
-                    }
-                    medicalNet = medicalNet.Where(c => categories.Contains(c.Category));
-                }
+                var medicalNets = medicalRepo.GetAll();
+                var medicalNetEn = new List<MedicalNetworkEnDTO>();
+                var medicalNetAr = new List<MedicalNetworkArDTO>();
 
-                var totalCount = medicalNet.Count();
-                medicalNet = medicalNet.Skip((StartPage - 1) * pageSize).Take(pageSize);
-                if (medicalNet == null) { return BadRequest(new MessageDto { Message = Messages.MedicalNetwork(lang)}); }
-               
-                    var medicalDto = new 
+                if (lang == "en")
+                {
+                    if (providerName is not null)
+                    {
+                        medicalNets = medicalNets.Where(x => x.provider_name_en.Contains(providerName));
+                    }
+                    if (categories != null && categories.Any())
+                    {
+                        for (int i = 0; i < categories.Length; i++)
+                        {
+                            var status = categories[i];
+                        }
+                        medicalNets = medicalNets.Where(c => categories.Contains(c.Category_Name_En));
+                    }
+
+                    var totalCount = medicalNets.Count();
+                    medicalNets = medicalNets.Skip((StartPage - 1) * pageSize).Take(pageSize);
+                    if (medicalNets == null) { return BadRequest(new MessageDto { Message = Messages.MedicalNetwork(lang) }); }
+                    foreach (var medicalNet in medicalNets)
+                    {
+                        MedicalNetworkEnDTO medicalNetEnDto = new MedicalNetworkEnDTO
+                        {
+
+                            Category = medicalNet.Category_Name_En,
+                            providerName = medicalNet.provider_name_en,
+                            Latitude = medicalNet.Latitude,
+                            Longitude = medicalNet.Longitude,
+                            Email = medicalNet.Email,
+                            Hotline = medicalNet.Hotline,
+                            Mobile = medicalNet.Mobile,
+                            Telephone = medicalNet.Telephone,
+                            SpecialtyName = medicalNet.General_Specialty_Name_En,
+                        };
+
+                        medicalNetEn.Add(medicalNetEnDto);
+
+                    }
+                    var medicalEnDto = new
                     {
 
                         TotalCount = totalCount,
                         PageNumber = StartPage,
                         PageSize = pageSize,
-                        MedicalNetwork = medicalNet,
+                        MedicalNetwork = medicalNetEn,
 
 
                     };
-                
 
-                return Ok(medicalDto);
-                
+
+                    return Ok(medicalEnDto);
+
+                }
+
+
+                if (providerName is not null)
+                {
+                    medicalNets = medicalNets.Where(x => x.Provider_name.Contains(providerName));
+                }
+                if (categories != null && categories.Any())
+                {
+                    for (int i = 0; i < categories.Length; i++)
+                    {
+                        var cat = categories[i];
+                    }
+                    medicalNets = medicalNets.Where(c => categories.Contains(c.Category));
+                }
+              
+
+                var totalCountt = medicalNets.Count();
+                medicalNets = medicalNets.Skip((StartPage - 1) * pageSize).Take(pageSize);
+                if (medicalNets == null) { return BadRequest(new MessageDto { Message = Messages.MedicalNetwork(lang) }); }
+                foreach (var medicalNet in medicalNets)
+                {
+                    MedicalNetworkArDTO medicalNetArDto = new MedicalNetworkArDTO
+                    {
+
+                        Category = medicalNet.Category,
+                        providerName = medicalNet.Provider_name,
+                        Latitude = medicalNet.Latitude,
+                        Longitude = medicalNet.Longitude,
+                        Email = medicalNet.Email,
+                        Hotline = medicalNet.Hotline,
+                        Mobile = medicalNet.Mobile,
+                        Telephone = medicalNet.Telephone,
+                        SpecialtyName = medicalNet.Speciality,
+                    };
+
+                    medicalNetAr.Add(medicalNetArDto);
+
+                }
+                var medicalArDto = new
+                {
+
+                    TotalCount = totalCountt,
+                    PageNumber = StartPage,
+                    PageSize = pageSize,
+                    MedicalNetwork = medicalNetAr,
+
+
+                };
+
+
+                return Ok(medicalArDto);
             }
             return BadRequest(ModelState);
-
         }
     }
 }
