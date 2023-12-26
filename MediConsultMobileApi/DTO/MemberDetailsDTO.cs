@@ -11,7 +11,7 @@ namespace MediConsultMobileApi.DTO
         public string? member_nid { get; set; }
         public string member_gender { get; set; }
         public string? email { get; set; }
-        public string[]? member_photo { get; set; }
+        public string? member_photo { get; set; }
         public string? birthDate { get; set; }
         public string? jobTitle { get; set; }
     }

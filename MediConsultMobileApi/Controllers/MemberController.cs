@@ -60,28 +60,48 @@ namespace MediConsultMobileApi.Controllers
 
                 }
                 string[] fileNames = Directory.GetFiles(member.member_photo);
-                //List<string> fileNameList = fileNames.ToList();
 
-                MemberDetailsProfileDTO memberDTo = new MemberDetailsProfileDTO
+                if (lang== "en")
+                {
+                    MemberDetailsProfileEnDTO memberEnDTo = new MemberDetailsProfileEnDTO
+                    {
+
+                        member_id = member.member_id,
+                        member_name = member.member_name,
+                        email = member.email,
+                        room_class = member.room_class,
+                        member_photo = fileNames[0],
+                        mobile = member.mobile,
+                        program_name = member.Type_Name_En,
+                        member_status = member.member_status,
+                        job_title = member.job_title,
+                        policy_id = member.policy_id,
+                        program_id = member.program_id,
+                        renew_date = member.renew_date
+
+
+                    };
+                    return Ok(memberEnDTo);
+                }
+                MemberDetailsProfileArDTO memberArDTo = new MemberDetailsProfileArDTO
                 {
 
                     member_id = member.member_id,
                     member_name = member.member_name,
                     email = member.email,
                     room_class = member.room_class,
-                    member_photo = fileNames,
+                    member_photo = fileNames[0],
                     mobile = member.mobile,
-                    program_name = member.program_name,
+                    program_name = member.Type_Name_Ar,
                     member_status = member.member_status,
-                    job_title = member.job_title,     
+                    job_title = member.job_title,
                     policy_id = member.policy_id,
                     program_id = member.program_id,
                     renew_date = member.renew_date
-                    
+
 
                 };
-                return Ok(memberDTo);
-                return Ok(member);
+                return Ok(memberArDTo);
             }
             return BadRequest(ModelState);
         }
@@ -165,7 +185,7 @@ namespace MediConsultMobileApi.Controllers
                     member_gender = member.member_gender,
                     email = member.email,
                     member_nid = member.member_nid,
-                    member_photo = fileNames,
+                    member_photo = fileNames[0],
                     mobile = member.mobile,
                     birthDate = member.member_birthday,
                     jobTitle = member.job_title
