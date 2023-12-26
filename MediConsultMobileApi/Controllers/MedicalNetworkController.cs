@@ -4,6 +4,7 @@ using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using System.Net.NetworkInformation;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -50,21 +51,26 @@ namespace MediConsultMobileApi.Controllers
                     if (medicalNets == null) { return BadRequest(new MessageDto { Message = Messages.MedicalNetwork(lang) }); }
                     foreach (var medicalNet in medicalNets)
                     {
-                        MedicalNetworkEnDTO medicalNetEnDto = new MedicalNetworkEnDTO
+                        if (!string.IsNullOrEmpty(medicalNet.Latitude) && !string.IsNullOrEmpty(medicalNet.Longitude) &&
+                            !medicalNet.Latitude.Contains(",") && !medicalNet.Longitude.Contains(","))
                         {
+                            MedicalNetworkEnDTO medicalNetEnDto = new MedicalNetworkEnDTO
+                            {
 
-                            Category = medicalNet.Category_Name_En,
-                            providerName = medicalNet.provider_name_en,
-                            Latitude = medicalNet.Latitude,
-                            Longitude = medicalNet.Longitude,
-                            Email = medicalNet.Email,
-                            Hotline = medicalNet.Hotline,
-                            Mobile = medicalNet.Mobile,
-                            Telephone = medicalNet.Telephone,
-                            SpecialtyName = medicalNet.General_Specialty_Name_En,
-                        };
+                                Category = medicalNet.Category_Name_En,
+                                providerName = medicalNet.provider_name_en,
+                                Latitude = medicalNet.Latitude,
+                                Longitude = medicalNet.Longitude,
+                                Email = medicalNet.Email,
+                                Hotline = medicalNet.Hotline,
+                                Mobile = medicalNet.Mobile,
+                                Telephone = medicalNet.Telephone,
+                                SpecialtyName = medicalNet.General_Specialty_Name_En,
+                            };
 
-                        medicalNetEn.Add(medicalNetEnDto);
+                            medicalNetEn.Add(medicalNetEnDto);
+                        }
+
 
                     }
                     var medicalEnDto = new
@@ -103,21 +109,25 @@ namespace MediConsultMobileApi.Controllers
                 if (medicalNets == null) { return BadRequest(new MessageDto { Message = Messages.MedicalNetwork(lang) }); }
                 foreach (var medicalNet in medicalNets)
                 {
-                    MedicalNetworkArDTO medicalNetArDto = new MedicalNetworkArDTO
+                    if (!string.IsNullOrEmpty(medicalNet.Latitude) && !string.IsNullOrEmpty(medicalNet.Longitude) &&
+                            !medicalNet.Latitude.Contains(",") && !medicalNet.Longitude.Contains(","))
                     {
+                        MedicalNetworkArDTO medicalNetArDto = new MedicalNetworkArDTO
+                        {
 
-                        Category = medicalNet.Category,
-                        providerName = medicalNet.Provider_name,
-                        Latitude = medicalNet.Latitude,
-                        Longitude = medicalNet.Longitude,
-                        Email = medicalNet.Email,
-                        Hotline = medicalNet.Hotline,
-                        Mobile = medicalNet.Mobile,
-                        Telephone = medicalNet.Telephone,
-                        SpecialtyName = medicalNet.Speciality,
-                    };
-
+                            Category = medicalNet.Category,
+                            providerName = medicalNet.Provider_name,
+                            Latitude = medicalNet.Latitude,
+                            Longitude = medicalNet.Longitude,
+                            Email = medicalNet.Email,
+                            Hotline = medicalNet.Hotline,
+                            Mobile = medicalNet.Mobile,
+                            Telephone = medicalNet.Telephone,
+                            SpecialtyName = medicalNet.Speciality,
+                        };
                     medicalNetAr.Add(medicalNetArDto);
+                    }
+
 
                 }
                 var medicalArDto = new
