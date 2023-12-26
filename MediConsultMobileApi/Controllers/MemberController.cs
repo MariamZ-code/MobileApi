@@ -59,6 +59,28 @@ namespace MediConsultMobileApi.Controllers
 
 
                 }
+                string[] fileNames = Directory.GetFiles(member.member_photo);
+                //List<string> fileNameList = fileNames.ToList();
+
+                MemberDetailsProfileDTO memberDTo = new MemberDetailsProfileDTO
+                {
+
+                    member_id = member.member_id,
+                    member_name = member.member_name,
+                    email = member.email,
+                    room_class = member.room_class,
+                    member_photo = fileNames,
+                    mobile = member.mobile,
+                    program_name = member.program_name,
+                    member_status = member.member_status,
+                    job_title = member.job_title,     
+                    policy_id = member.policy_id,
+                    program_id = member.program_id,
+                    renew_date = member.renew_date
+                    
+
+                };
+                return Ok(memberDTo);
                 return Ok(member);
             }
             return BadRequest(ModelState);
@@ -133,6 +155,8 @@ namespace MediConsultMobileApi.Controllers
 
                 }
 
+                string[] fileNames = Directory.GetFiles(member.member_photo);
+
                 var memberDTo = new MemberDetailsDTO
                 {
 
@@ -141,7 +165,7 @@ namespace MediConsultMobileApi.Controllers
                     member_gender = member.member_gender,
                     email = member.email,
                     member_nid = member.member_nid,
-                    member_photo = member.member_photo,
+                    member_photo = fileNames,
                     mobile = member.mobile,
                     birthDate = member.member_birthday,
                     jobTitle = member.job_title
