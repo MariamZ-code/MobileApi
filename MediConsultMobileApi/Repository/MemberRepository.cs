@@ -34,8 +34,8 @@ namespace MediConsultMobileApi.Repository
 
         }
 
-        #endregion
-
+        #endregion          
+         
         #region ValidationMember
         public async Task<MessageDto> validation(Member member)
         {
@@ -83,17 +83,17 @@ namespace MediConsultMobileApi.Repository
         #endregion
 
         #region MemberDetails
-        public async Task<ClientBranchMember> MemberDetails(int memberId)
+        public  ClientBranchMember MemberDetails(int memberId)
         {
-            return await dbContext.clientBranchMembers.FirstOrDefaultAsync(m => m.member_id == memberId); 
+            return  dbContext.clientBranchMembers.FirstOrDefault(m => m.member_id == memberId); 
         }
         #endregion
 
         #region UpdateMember
-        public async void UpdateMember(UpdateMemberDTO memberDTO , int id)
+        public  void UpdateMember(UpdateMemberDTO memberDTO , int id)
         {
             var serverPath = AppDomain.CurrentDomain.BaseDirectory;
-            var member = await MemberDetails(id);
+            var member =  MemberDetails(id);
             member.email = memberDTO.Email;
             member.mobile = memberDTO.Mobile;
             member.member_nid = memberDTO.SSN;

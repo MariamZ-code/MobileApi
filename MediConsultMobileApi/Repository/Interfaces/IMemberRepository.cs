@@ -17,7 +17,7 @@ namespace MediConsultMobileApi.Repository.Interfaces
 
         Task<List<ClientBranchMember>> MemberFamily(int id);
 
-        Task<ClientBranchMember> MemberDetails(int memberId);
+        ClientBranchMember MemberDetails(int memberId);
 
         void UpdateMember(UpdateMemberDTO memberDTO, int id);
         void SaveDatabase();

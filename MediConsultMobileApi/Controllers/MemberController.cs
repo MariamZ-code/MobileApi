@@ -167,7 +167,7 @@ namespace MediConsultMobileApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                var member = await memberRepo.MemberDetails(memberId);
+                var member =  memberRepo.MemberDetails(memberId);
                 var memberExists = memberRepo.MemberExists(memberId);
                 if (!memberExists)
                 {
@@ -204,7 +204,7 @@ namespace MediConsultMobileApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await memberRepo.MemberDetails(id);
+                var result =  memberRepo.MemberDetails(id);
                 var memberExists = memberRepo.MemberExists(id);
 
                 string[] validExtensions = { ".jpg", ".jpeg", ".png" };
