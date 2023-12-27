@@ -28,7 +28,7 @@ builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
 builder.Services.AddScoped<IRefundTypeRepository, RefundTypeRepository>();
 builder.Services.AddScoped<IValidation, Validation>();
 builder.Services.AddScoped<ISMSService , SMSService>();
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("cs")), ServiceLifetime.Scoped);
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("cs")));
 
 
 // Add services to the container.

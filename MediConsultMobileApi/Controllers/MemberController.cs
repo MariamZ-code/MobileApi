@@ -163,7 +163,7 @@ namespace MediConsultMobileApi.Controllers
 
         #region MemberDetails
         [HttpGet("MemberDetails")]
-        public async Task<IActionResult> MemberDetails([Required] int memberId, string lang)
+        public  IActionResult MemberDetails([Required] int memberId, string lang)
         {
             if (ModelState.IsValid)
             {
