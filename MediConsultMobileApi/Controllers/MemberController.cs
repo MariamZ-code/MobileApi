@@ -28,7 +28,7 @@ namespace MediConsultMobileApi.Controllers
 
         #region MemberById
         [HttpGet("Id")]
-        public async Task<IActionResult> GetById(int id , string lang)
+        public async Task<IActionResult> GetById(int id, string lang)
         {
 
             if (ModelState.IsValid)
@@ -47,22 +47,45 @@ namespace MediConsultMobileApi.Controllers
                 }
                 if (member.member_status == "Deactivated")
                 {
-                    
+
 
                     return BadRequest(new MessageDto { Message = Messages.MemberDeactivated(lang) });
 
                 }
                 if (member.member_status == "Hold")
                 {
+
                     return BadRequest(new MessageDto { Message = Messages.MemberHold(lang) });
 
 
-
                 }
-                string[] fileNames = Directory.GetFiles(member.member_photo);
 
-                if (lang== "en")
+                if (lang == "en")
                 {
+                    if (string.IsNullOrEmpty(member.member_photo))
+                    {
+                        MemberDetailsProfileEnDTO memberEn1DTo = new MemberDetailsProfileEnDTO
+                        {
+
+                            member_id = member.member_id,
+                            member_name = member.member_name,
+                            email = member.email,
+                            room_class = member.room_class,
+                            member_photo = "",
+                            mobile = member.mobile,
+                            program_name = member.Type_Name_En,
+                            member_status = member.member_status,
+                            job_title = member.job_title,
+                            policy_id = member.policy_id,
+                            program_id = member.program_id,
+                            renew_date = member.renew_date
+
+
+                        };
+                        return Ok(memberEn1DTo);
+                    }
+                    string[] fileNames2 = Directory.GetFiles(member.member_photo);
+
                     MemberDetailsProfileEnDTO memberEnDTo = new MemberDetailsProfileEnDTO
                     {
 
@@ -70,7 +93,7 @@ namespace MediConsultMobileApi.Controllers
                         member_name = member.member_name,
                         email = member.email,
                         room_class = member.room_class,
-                        member_photo = fileNames[0],
+                        member_photo = fileNames2[0],
                         mobile = member.mobile,
                         program_name = member.Type_Name_En,
                         member_status = member.member_status,
@@ -83,6 +106,31 @@ namespace MediConsultMobileApi.Controllers
                     };
                     return Ok(memberEnDTo);
                 }
+
+                if (string.IsNullOrEmpty(member.member_photo))
+                {
+                    MemberDetailsProfileArDTO memberEn1DTo = new MemberDetailsProfileArDTO
+                    {
+
+                        member_id = member.member_id,
+                        member_name = member.member_name,
+                        email = member.email,
+                        room_class = member.room_class,
+                        member_photo = "",
+                        mobile = member.mobile,
+                        program_name = member.Type_Name_En,
+                        member_status = member.member_status,
+                        job_title = member.job_title,
+                        policy_id = member.policy_id,
+                        program_id = member.program_id,
+                        renew_date = member.renew_date
+
+
+                    };
+                    return Ok(memberEn1DTo);
+                }
+                string[] fileNames = Directory.GetFiles(member.member_photo);
+
                 MemberDetailsProfileArDTO memberArDTo = new MemberDetailsProfileArDTO
                 {
 
@@ -110,7 +158,7 @@ namespace MediConsultMobileApi.Controllers
 
         #region MemberFamily
         [HttpGet("Family")]
-        public async Task<IActionResult> MemberFamily([Required] int memberId , string lang)
+        public async Task<IActionResult> MemberFamily([Required] int memberId, string lang)
         {
             if (ModelState.IsValid)
             {
@@ -163,11 +211,11 @@ namespace MediConsultMobileApi.Controllers
 
         #region MemberDetails
         [HttpGet("MemberDetails")]
-        public  IActionResult MemberDetails([Required] int memberId, string lang)
+        public IActionResult MemberDetails([Required] int memberId, string lang)
         {
             if (ModelState.IsValid)
             {
-                var member =  memberRepo.MemberDetails(memberId);
+                var member = memberRepo.MemberDetails(memberId);
                 var memberExists = memberRepo.MemberExists(memberId);
                 if (!memberExists)
                 {
@@ -204,7 +252,7 @@ namespace MediConsultMobileApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result =  memberRepo.MemberDetails(id);
+                var result = memberRepo.MemberDetails(id);
                 var memberExists = memberRepo.MemberExists(id);
 
                 string[] validExtensions = { ".jpg", ".jpeg", ".png" };
@@ -225,10 +273,10 @@ namespace MediConsultMobileApi.Controllers
 
                     if (existingMemberWithSameEmail != null && existingMemberWithSameEmail.member_id != id)
                     {
-                    return BadRequest(new MessageDto { Message = Messages.Emailexist(lang) });
-                        
+                        return BadRequest(new MessageDto { Message = Messages.Emailexist(lang) });
+
                     }
-                    
+
                     if (!validation.IsValidEmail(memberDTO.Email))
                     {
                         return BadRequest(new MessageDto { Message = Messages.EmailNotValid(lang) });
@@ -273,7 +321,7 @@ namespace MediConsultMobileApi.Controllers
                     if (!long.TryParse(memberDTO.SSN, out _))
                     {
                         return BadRequest(new MessageDto { Message = Messages.NationalIdNumber(lang) });
-                        
+
 
                     }
                     if (memberDTO.SSN.Length != 14)
@@ -345,17 +393,17 @@ namespace MediConsultMobileApi.Controllers
                     }
                 }
 
-                memberRepo.UpdateMember(memberDTO , id);
+                memberRepo.UpdateMember(memberDTO, id);
                 memberRepo.SaveDatabase();
-                
+
                 return Ok(new MessageDto { Message = Messages.MemberChange(lang) });
             }
-            return BadRequest(ModelState);  
+            return BadRequest(ModelState);
         }
-              
 
 
-          
+
+
         #endregion
 
     }
