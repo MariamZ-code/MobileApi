@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Concurrent;
 using System.Net.Mail;
 using System.Net;
-using MediConsultMobileApi.Services;
+
 using MediConsultMobileApi.Language;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;

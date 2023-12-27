@@ -3,7 +3,7 @@ using MediConsultMobileApi.DTO;
 using MediConsultMobileApi.Language;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
-using MediConsultMobileApi.Services;
+
 using MediConsultMobileApi.Validations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -25,15 +25,15 @@ namespace MediConsultMobileApi.Controllers
     {
         private readonly IAuthRepository authRepo;
 
-        private readonly ISMSService sMS;
+
 
         private readonly IMemberRepository memberRepo;
         private readonly IValidation validation;
 
-        public LoginController(IAuthRepository authRepo, ISMSService sMS, IMemberRepository memberRepo, IValidation validation)
+        public LoginController(IAuthRepository authRepo,  IMemberRepository memberRepo, IValidation validation)
         {
             this.authRepo = authRepo;
-            this.sMS = sMS;
+           
             this.memberRepo = memberRepo;
             this.validation = validation;
         }

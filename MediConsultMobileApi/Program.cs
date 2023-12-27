@@ -5,7 +5,7 @@ using MediConsultMobileApi.Helper;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository;
 using MediConsultMobileApi.Repository.Interfaces;
-using MediConsultMobileApi.Services;
+
 using MediConsultMobileApi.Validations;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 var builder = WebApplication.CreateBuilder(args);
 
 //var txt = "_myAllowSpecificOrigins";
-builder.Services.Configure<TwilioSettings>(builder.Configuration.GetSection("Twilio"));
+
 builder.Services.AddScoped<IAuthRepository, AuthRepository>(); 
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IServiceRepository, SeviceRepository>();
@@ -27,7 +27,7 @@ builder.Services.AddScoped<IRefundRepository, RefundRepository>();
 builder.Services.AddScoped<IPolicyRepository, PolicyRepository>();
 builder.Services.AddScoped<IRefundTypeRepository, RefundTypeRepository>();
 builder.Services.AddScoped<IValidation, Validation>();
-builder.Services.AddScoped<ISMSService , SMSService>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("cs")));
 
 
