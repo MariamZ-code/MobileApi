@@ -26,6 +26,7 @@ namespace MediConsultMobileApi.Controllers
             this.validation = validation;
         }
 
+
         #region MemberById
         [HttpGet("Id")]
         public async Task<IActionResult> GetById(int id, string lang)
@@ -59,13 +60,24 @@ namespace MediConsultMobileApi.Controllers
 
 
                 }
-                string[] fileNames = string.IsNullOrEmpty(member.member_photo) ? null : Directory.GetFiles(member.member_photo);
+
+                string imagePath(string image)
+                {
+                    if (string.IsNullOrEmpty(image))
+                    {
+                        return string.Empty;
+                    }
+                    if (Path.Exists(image))
+                    {
+                        string[] fileNames = Directory.GetFiles(image);
+                        return fileNames[0];
+                    }
+                    return string.Empty;
+                }
 
 
                 if (lang == "en")
                 {
-               
-
                     MemberDetailsProfileEnDTO memberEnDTo = new MemberDetailsProfileEnDTO
                     {
 
@@ -73,7 +85,7 @@ namespace MediConsultMobileApi.Controllers
                         member_name = member.member_name,
                         email = member.email,
                         room_class = member.room_class,
-                        member_photo =fileNames is null?null: fileNames[0],
+                        member_photo = imagePath(member.member_photo),
                         mobile = member.mobile,
                         program_name = member.Type_Name_En,
                         member_status = member.member_status,
@@ -84,11 +96,12 @@ namespace MediConsultMobileApi.Controllers
 
 
                     };
-           
+
 
                     return Ok(memberEnDTo);
-
                 }
+
+
 
 
                 MemberDetailsProfileArDTO memberArDTo = new MemberDetailsProfileArDTO
@@ -98,7 +111,8 @@ namespace MediConsultMobileApi.Controllers
                     member_name = member.member_name,
                     email = member.email,
                     room_class = member.room_class,
-                    member_photo = fileNames is null ? null : fileNames[0],
+                    member_photo = imagePath(member.member_photo),
+
                     mobile = member.mobile,
                     program_name = member.Type_Name_Ar,
                     member_status = member.member_status,
@@ -183,7 +197,20 @@ namespace MediConsultMobileApi.Controllers
 
                 }
 
-                string[] fileNames = string.IsNullOrEmpty(member.member_photo) ? null : Directory.GetFiles(member.member_photo);
+                string imagePath(string image)
+                {
+                    if (string.IsNullOrEmpty(image))
+                    {
+                        return string.Empty;
+                    }
+                    if (Path.Exists(image))
+                    {
+                        string[] fileNames = Directory.GetFiles(image);
+                        return fileNames[0];
+                    }
+                    return string.Empty;
+                }
+
 
 
                 var memberDTo = new MemberDetailsDTO
@@ -194,7 +221,7 @@ namespace MediConsultMobileApi.Controllers
                     member_gender = member.member_gender,
                     email = member.email,
                     member_nid = member.member_nid,
-                    member_photo = fileNames is null ? null : fileNames[0],
+                    member_photo = imagePath(member.member_photo),
 
                     mobile = member.mobile,
                     birthDate = member.member_birthday,
