@@ -129,7 +129,7 @@
         
         public static string PasswordAndIdRequired(string language)
         {
-            return language == "ar" ? "ادخل (رقم التعريف/الرقم القومي) و كلمة المرور" : "Id/National Id and Password is required";
+            return language == "ar" ? "ادخل (رقم التعريف/الرقم القومي) و كلمة المرور" : "Id/NationalId and Password is required";
         }
         public static string InvalidId (string language)
         {
@@ -137,7 +137,7 @@
         }
         public static string PasswordAndIdIncorrect(string language)
         {
-            return language == "ar" ? "رقم التعريف/الرقم القومي او كلمة المرور غير صالحة" : "Id/National Id  or Password is incorrect";
+            return language == "ar" ? "رقم التعريف/الرقم القومي او كلمة المرور غير صالحة" : "Id/NationalId  or Password is incorrect";
         }
         public static string AccountDisabled(string language)
         {

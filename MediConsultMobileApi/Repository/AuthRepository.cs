@@ -55,8 +55,6 @@ namespace MediConsultMobileApi.Repository
         #endregion
 
         #region Login
-
-
         public async Task<MessageDto> Login(LoginUserDto userDto , string lang)
         {
             var authDto = new MessageDto();

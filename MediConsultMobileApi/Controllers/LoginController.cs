@@ -215,12 +215,7 @@ namespace MediConsultMobileApi.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginUserDto userDto, string lang)
         {
-            var memberExists = memberRepo.MemberExists(int.Parse(userDto.Id));
-            if (!memberExists)
-            {
-                return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
-
-            }
+          
             if (userDto.Id == string.Empty || userDto.Password == string.Empty)
             {
                 return BadRequest(new MessageDto { Message = Messages.PasswordAndIdRequired(lang) });
@@ -232,12 +227,20 @@ namespace MediConsultMobileApi.Controllers
                 return BadRequest(new MessageDto { Message = Messages.InvalidId(lang) });
 
             }
+            var memberExists = memberRepo.MemberExists(int.Parse(userDto.Id));
+            if (!memberExists)
+            {
+                return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+
+            }
+            
             var user = await authRepo.Login(userDto, lang);
 
-            if (user.Message is "Id or Password is incorrect" || user.Message is "Account Disabled")
+            if (user.Message == Messages.PasswordAndIdIncorrect(lang) || user.Message == Messages.AccountDisabled(lang))
             {
-                return BadRequest(user);
+                return BadRequest(new MessageDto { Message = Messages.PasswordAndIdIncorrect(lang)});
             }
+
             return Ok(user);
 
         }
