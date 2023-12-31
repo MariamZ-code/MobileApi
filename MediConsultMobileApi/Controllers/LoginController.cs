@@ -101,6 +101,8 @@ namespace MediConsultMobileApi.Controllers
 
 
                 }
+                var (date, gender) = memberRepo.CreateDateAndGender(userDto.NationalId);
+
                 if (userDto.NationalId is not null)
                 {
 
@@ -121,15 +123,25 @@ namespace MediConsultMobileApi.Controllers
                         return BadRequest(new MessageDto { Message = Messages.NationalIdExist(lang) });
 
                     }
-                }
 
-                if (userDto.Otp != member.Otp)
+                    if (!memberRepo.IsValidDate(date))
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.NationalIdInvalid(lang) });
+
+
+                    }
+                }
+                if (userDto.Password.Length < 8)
                 {
-                    return BadRequest(new MessageDto { Message = Messages.IncorrectOtp(lang) });
+                    return BadRequest(new MessageDto { Message = Messages.PasswordFormat(lang) });
                 }
                 if (userDto.ConfirmPassword != userDto.Password)
                 {
                     return BadRequest(new MessageDto { Message = Messages.PasswordAndConfirmPassword(lang) });
+                }
+                if (userDto.Otp != member.Otp)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.IncorrectOtp(lang) });
                 }
 
                 authRepo.Registeration(userDto, id);
@@ -273,8 +285,10 @@ namespace MediConsultMobileApi.Controllers
                 }
 
                 string otp = GenerateOtp();
-                
-                string url = $"https://hcms.mediconsulteg.com/sms_api/Message/SendSMS?text={otp}&mobile={memberMobile}";
+                string text = "Dear Customer , Your OTP is : ";
+
+
+                string url = $"https://hcms.mediconsulteg.com/sms_api/Message/SendSMS?text={text}{otp}&mobile={memberMobile}";
                 using (var client = new HttpClient())
                 {
                     var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");

@@ -17,6 +17,7 @@
         public int? program_id { get; set; }
 
         public int? policy_id { get; set; }
+        public string? member_birthday { get; set; }
         public string? job_title { get; set; }
     }
 }

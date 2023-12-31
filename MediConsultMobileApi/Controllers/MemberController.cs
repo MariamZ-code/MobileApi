@@ -10,6 +10,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mail;
+using static System.Net.Mime.MediaTypeNames;
+using System.IO;
+using Microsoft.AspNetCore.Hosting.Server;
+using System.Globalization;
 
 namespace MediConsultMobileApi.Controllers
 {
@@ -19,7 +23,7 @@ namespace MediConsultMobileApi.Controllers
     {
         private readonly IMemberRepository memberRepo;
         private readonly IValidation validation;
-
+        private readonly string imageBaseUrl = "https://api.mediconsulteg.com/";
         public MemberController(IMemberRepository memberRepo, IValidation validation)
         {
             this.memberRepo = memberRepo;
@@ -60,20 +64,22 @@ namespace MediConsultMobileApi.Controllers
 
 
                 }
-
-                string imagePath(string image)
+                string imageUrl(string imageName)
                 {
-                    if (string.IsNullOrEmpty(image))
+                    if (string.IsNullOrEmpty(imageName))
                     {
                         return string.Empty;
                     }
-                    if (Path.Exists(image))
+                    // Concatenate the base URL with the image name to form the complete URL
+
+                    if (Path.Exists(imageName))
                     {
-                        string[] fileNames = Directory.GetFiles(image);
-                        return fileNames[0];
+                        string[] fileNames = Directory.GetFiles(imageName);
+                        return $"{imageBaseUrl}{fileNames[0]}";
                     }
                     return string.Empty;
                 }
+
 
 
                 if (lang == "en")
@@ -85,14 +91,15 @@ namespace MediConsultMobileApi.Controllers
                         member_name = member.member_name,
                         email = member.email,
                         room_class = member.room_class,
-                        member_photo = imagePath(member.member_photo),
+                        member_photo = imageUrl(member.member_photo),
                         mobile = member.mobile,
                         program_name = member.Type_Name_En,
                         member_status = member.member_status,
                         job_title = member.job_title,
                         policy_id = member.policy_id,
                         program_id = member.program_id,
-                        renew_date = member.renew_date
+                        renew_date = member.renew_date,
+                        member_birthday = member.member_birthday,
 
 
                     };
@@ -101,9 +108,6 @@ namespace MediConsultMobileApi.Controllers
                     return Ok(memberEnDTo);
                 }
 
-
-
-
                 MemberDetailsProfileArDTO memberArDTo = new MemberDetailsProfileArDTO
                 {
 
@@ -111,16 +115,15 @@ namespace MediConsultMobileApi.Controllers
                     member_name = member.member_name,
                     email = member.email,
                     room_class = member.room_class,
-                    member_photo = imagePath(member.member_photo),
-
+                    member_photo = imageUrl(member.member_photo),
                     mobile = member.mobile,
                     program_name = member.Type_Name_Ar,
                     member_status = member.member_status,
                     job_title = member.job_title,
                     policy_id = member.policy_id,
                     program_id = member.program_id,
-                    renew_date = member.renew_date
-
+                    renew_date = member.renew_date,
+                    member_birthday = member.member_birthday,
 
                 };
                 return Ok(memberArDTo);
@@ -185,7 +188,7 @@ namespace MediConsultMobileApi.Controllers
 
         #region MemberDetails
         [HttpGet("MemberDetails")]
-        public IActionResult MemberDetails([Required] int memberId, string lang)
+        public async Task<IActionResult> MemberDetails([Required] int memberId, string lang)
         {
             if (ModelState.IsValid)
             {
@@ -197,20 +200,43 @@ namespace MediConsultMobileApi.Controllers
 
                 }
 
-                string imagePath(string image)
+                async Task<string> imageUrl(string imageName)
                 {
-                    if (string.IsNullOrEmpty(image))
+                    if (string.IsNullOrEmpty(imageName))
                     {
                         return string.Empty;
                     }
-                    if (Path.Exists(image))
+                    // Concatenate the base URL with the image name to form the complete URL
+
+                    if (Path.Exists(imageName))
                     {
-                        string[] fileNames = Directory.GetFiles(image);
-                        return fileNames[0];
+                        using (HttpClient client = new HttpClient())
+                        {
+                            string[] fileNames = Directory.GetFiles(imageName);
+
+                            // Adjust the base URL according to your API's location
+                            client.BaseAddress = new Uri("https://api.mediconsulteg.com/");
+
+
+                            // Make the request to the API endpoint
+                            HttpResponseMessage response = await client.GetAsync($"{fileNames[0]}");
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                // Get the image bytes
+                                byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
+
+                                // Display the image in your app using the imageBytes
+                                // (This depends on the UI framework you're using in your app)
+                                // Example: imageControl.Source = BitmapImage.FromStream(new MemoryStream(imageBytes));
+                                return imageBytes.ToString();
+                            }
+                        }
+                        return string.Empty;
                     }
                     return string.Empty;
-                }
 
+                }
 
 
                 var memberDTo = new MemberDetailsDTO
@@ -221,7 +247,7 @@ namespace MediConsultMobileApi.Controllers
                     member_gender = member.member_gender,
                     email = member.email,
                     member_nid = member.member_nid,
-                    member_photo = imagePath(member.member_photo),
+                    member_photo =await imageUrl(member.member_photo),
 
                     mobile = member.mobile,
                     birthDate = member.member_birthday,
@@ -252,6 +278,7 @@ namespace MediConsultMobileApi.Controllers
                     return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
                 }
+               
                 var existingMemberWithSameMobile = memberRepo.GetMemberByMobile(memberDTO.Mobile);
                 var existingMemberWithSameEmail = memberRepo.GetMemberByEmail(memberDTO.Email);
                 var existingMemberWithSameNationalId = memberRepo.GetMemberByNationalId(memberDTO.SSN);
@@ -302,6 +329,7 @@ namespace MediConsultMobileApi.Controllers
 
                 }
 
+                var (date, gender) = memberRepo.CreateDateAndGender(memberDTO.SSN);
 
 
                 if (memberDTO.SSN is not null)
@@ -322,6 +350,13 @@ namespace MediConsultMobileApi.Controllers
                     if (existingMemberWithSameNationalId != null && existingMemberWithSameNationalId.member_id != id)
                     {
                         return BadRequest(new MessageDto { Message = Messages.NationalIdExist(lang) });
+
+                    }
+
+                    if (!memberRepo.IsValidDate(date))
+                    {
+                        return BadRequest(new MessageDto { Message = Messages.NationalIdInvalid(lang) });
+
 
                     }
                 }
@@ -382,6 +417,7 @@ namespace MediConsultMobileApi.Controllers
                     }
                 }
 
+
                 memberRepo.UpdateMember(memberDTO, id);
                 memberRepo.SaveDatabase();
 
@@ -394,6 +430,8 @@ namespace MediConsultMobileApi.Controllers
 
 
         #endregion
+
+   
 
     }
 }

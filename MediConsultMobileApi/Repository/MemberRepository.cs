@@ -3,6 +3,7 @@ using MediConsultMobileApi.DTO;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Reflection;
 using System.Security.Cryptography;
 
@@ -103,8 +104,8 @@ namespace MediConsultMobileApi.Repository
             if (memberDTO.SSN is not null)
             {
                 var (date, gender) = CreateDateAndGender(memberDTO.SSN);
-
-                member.member_birthday = date ;
+                member.member_birthday = date;
+           
                 member.member_gender = gender;
             }
             member.member_photo =folder;
@@ -142,6 +143,21 @@ namespace MediConsultMobileApi.Repository
         }
         #endregion
 
+
+        #region ValidationDateGender
+
+        public bool IsValidDate(string date)
+        {
+            // Parse the date to get the day part.
+            if (DateTime.TryParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
+            {
+                // Check if the day is less than 31.
+                return parsedDate.Day < 31 && parsedDate.Month < 12;
+            }
+
+            return false;
+        }
+        #endregion
         public void SaveDatabase()
         {
             dbContext.SaveChanges();

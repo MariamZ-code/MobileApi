@@ -17,23 +17,19 @@ namespace MediConsultMobileApi.Models
 
         public string? mobile { get; set; }
 
-        // TODO : Add Column to DB
-        // TODO : Add column  member_program_name_view
         public string? Type_Name_Ar { get; set; }
-
-        // TODO : Add Column to DB
-        // TODO : Add column  member_program_name_view
-
         public string? Type_Name_En { get; set; }
 
         public string? email { get; set; }
 
         public int? program_id { get; set; }
 
-        // TODO : Add Column to DB
-
         public int? policy_id { get; set; }
         public string? job_title { get; set; }
+
+        // TODO : Add Column to DB
+        public string? member_birthday { get; set; }
+
 
     }
 }

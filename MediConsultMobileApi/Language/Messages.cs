@@ -82,6 +82,10 @@
         {
             return language == "ar" ? "الرقم القومي موجودة بالفعل لعضو آخر" : "National Id already exists for another member.";
         }
+        public static string NationalIdInvalid(string language)
+        {
+            return language == "ar" ? "الرقم القومي غير صحيح" : "Invalid National Id.";
+        }
 
         // Photo Validation 
         public static string NoFileUploaded (string language)
@@ -118,9 +122,14 @@
 
 
         // Login 
+        public static string PasswordFormat(string language)
+        {
+            return language == "ar" ? "كلمة المرور يجب ان تكون اكثر من 8 حروف او ارقام " : "Password  must be more than 8 charactar ";
+        }
+        
         public static string PasswordAndIdRequired(string language)
         {
-            return language == "ar" ? "ادخلid  وكلمة المرور" : "Id and Password is required";
+            return language == "ar" ? "ادخل (رقم التعريف/الرقم القومي) و كلمة المرور" : "Id/National Id and Password is required";
         }
         public static string InvalidId (string language)
         {
@@ -128,7 +137,7 @@
         }
         public static string PasswordAndIdIncorrect(string language)
         {
-            return language == "ar" ? "بطاقة التعريف او كلمة المرور غير صالحة" : "Id or Password is incorrect";
+            return language == "ar" ? "رقم التعريف/الرقم القومي او كلمة المرور غير صالحة" : "Id/National Id  or Password is incorrect";
         }
         public static string AccountDisabled(string language)
         {

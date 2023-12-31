@@ -20,6 +20,7 @@ namespace MediConsultMobileApi.Repository.Interfaces
         ClientBranchMember MemberDetails(int memberId);
 
         void UpdateMember(UpdateMemberDTO memberDTO, int id);
+        bool IsValidDate(string date);
         void SaveDatabase();
 
     }
