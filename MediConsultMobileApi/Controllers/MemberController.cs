@@ -14,6 +14,8 @@ using static System.Net.Mime.MediaTypeNames;
 using System.IO;
 using Microsoft.AspNetCore.Hosting.Server;
 using System.Globalization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace MediConsultMobileApi.Controllers
 {
@@ -23,11 +25,13 @@ namespace MediConsultMobileApi.Controllers
     {
         private readonly IMemberRepository memberRepo;
         private readonly IValidation validation;
+        private readonly IWebHostEnvironment webHostEnvironment;
         private readonly string imageBaseUrl = "https://api.mediconsulteg.com/";
-        public MemberController(IMemberRepository memberRepo, IValidation validation)
+        public MemberController(IMemberRepository memberRepo, IValidation validation , IWebHostEnvironment webHostEnvironment)
         {
             this.memberRepo = memberRepo;
             this.validation = validation;
+            this.webHostEnvironment = webHostEnvironment;
         }
 
 
@@ -76,6 +80,7 @@ namespace MediConsultMobileApi.Controllers
                     {
                         string[] fileNames = Directory.GetFiles(imageName);
                         return $"{imageBaseUrl}{fileNames[0]}";
+
                     }
                     return string.Empty;
                 }
@@ -200,43 +205,29 @@ namespace MediConsultMobileApi.Controllers
 
                 }
 
-                async Task<string> imageUrl(string imageName)
+
+                string imageUrl(string imageName)
                 {
                     if (string.IsNullOrEmpty(imageName))
                     {
                         return string.Empty;
                     }
-                    // Concatenate the base URL with the image name to form the complete URL
 
                     if (Path.Exists(imageName))
                     {
-                        using (HttpClient client = new HttpClient())
+                        string[] fileNames = Directory.GetFiles(imageName);
+                        int membersIndex = fileNames[0].IndexOf("Members");
+                        if (membersIndex != -1)
                         {
-                            string[] fileNames = Directory.GetFiles(imageName);
-
-                            // Adjust the base URL according to your API's location
-                            client.BaseAddress = new Uri("https://api.mediconsulteg.com/");
-
-
-                            // Make the request to the API endpoint
-                            HttpResponseMessage response = await client.GetAsync($"{fileNames[0]}");
-
-                            if (response.IsSuccessStatusCode)
-                            {
-                                // Get the image bytes
-                                byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
-
-                                // Display the image in your app using the imageBytes
-                                // (This depends on the UI framework you're using in your app)
-                                // Example: imageControl.Source = BitmapImage.FromStream(new MemoryStream(imageBytes));
-                                return imageBytes.ToString();
-                            }
+                            // Extract the path starting from "Members"
+                            string membersPath = fileNames[0].Substring(membersIndex);
+                            return $"{imageBaseUrl}{membersPath}";
                         }
                         return string.Empty;
                     }
                     return string.Empty;
-
                 }
+
 
 
                 var memberDTo = new MemberDetailsDTO
@@ -247,8 +238,7 @@ namespace MediConsultMobileApi.Controllers
                     member_gender = member.member_gender,
                     email = member.email,
                     member_nid = member.member_nid,
-                    member_photo =await imageUrl(member.member_photo),
-
+                    member_photo =imageUrl(member.member_photo),
                     mobile = member.mobile,
                     birthDate = member.member_birthday,
                     jobTitle = member.job_title
@@ -365,19 +355,8 @@ namespace MediConsultMobileApi.Controllers
                 if (memberDTO.Photo is not null)
                 {
 
-                    if (memberDTO.Photo is null || memberDTO.Photo.Length == 0)
-                    {
-                        return BadRequest(new MessageDto { Message = Messages.NationalIdNumber(lang) });
-
-                    }
-                    if (memberDTO.Photo.Length > maxSizeBytes)
-                    {
-                        return BadRequest(new MessageDto { Message = Messages.NoFileUploaded(lang) });
-
-                    }
                     var serverPath = AppDomain.CurrentDomain.BaseDirectory;
-                    // serverPath/Member/id
-                    var folder = Path.Combine(serverPath, "Members", result.member_id.ToString());
+                    var folder = Path.Combine(webHostEnvironment.WebRootPath, "Members", result.member_id.ToString());
 
 
                     if (memberDTO.Photo.Length == 0)
@@ -406,14 +385,16 @@ namespace MediConsultMobileApi.Controllers
                     {
                         Directory.CreateDirectory(folder);
                     }
+
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + memberDTO.Photo.FileName;
 
                     string filePath = Path.Combine(folder, uniqueFileName);
 
-
-                    using (FileStream stream = new FileStream(filePath, FileMode.Create))
+                    using (FileStream fileStream = System.IO.File.Create(filePath))
                     {
-                        await memberDTO.Photo.CopyToAsync(stream);
+                        await memberDTO.Photo.CopyToAsync(fileStream);
+                        fileStream.Flush();
+
                     }
                 }
 
@@ -431,7 +412,6 @@ namespace MediConsultMobileApi.Controllers
 
         #endregion
 
-   
 
     }
 }

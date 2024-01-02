@@ -46,17 +46,16 @@ FirebaseApp.Create(new AppOptions()
 });
 
 
-
-#region Cors
-//builder.Services.AddCors(corsOptions =>
-//{
-//    corsOptions.AddPolicy("_myAllowSpecificOrigins", corsPolicyBuilder =>
-//    {
-//        corsPolicyBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-//    });
-//});
-
-#endregion
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
 
 
 
@@ -71,8 +70,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 
 app.UseStaticFiles();
 app.UseHttpsRedirection();
-//app.UseCors("_myAllowSpecificOrigins");//corsS
 
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 

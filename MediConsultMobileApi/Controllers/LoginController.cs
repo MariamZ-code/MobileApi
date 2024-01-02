@@ -221,7 +221,6 @@ namespace MediConsultMobileApi.Controllers
                 return BadRequest(new MessageDto { Message = Messages.PasswordAndIdRequired(lang) });
 
             }
-
             if (!int.TryParse(userDto.Id, out _))
             {
                 return BadRequest(new MessageDto { Message = Messages.InvalidId(lang) });
@@ -233,7 +232,7 @@ namespace MediConsultMobileApi.Controllers
                 return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
             }
-            
+
             var user = await authRepo.Login(userDto, lang);
 
             if (user.Message == Messages.PasswordAndIdIncorrect(lang) || user.Message == Messages.AccountDisabled(lang))
