@@ -68,6 +68,7 @@ namespace MediConsultMobileApi.Controllers
 
 
                 }
+                
                 string imageUrl(string imageName)
                 {
                     if (string.IsNullOrEmpty(imageName))
@@ -78,6 +79,7 @@ namespace MediConsultMobileApi.Controllers
 
                     if (Path.Exists(imageName))
                     {
+
                         string[] fileNames = Directory.GetFiles(imageName);
                         return $"{fileNames[0]}";
 
