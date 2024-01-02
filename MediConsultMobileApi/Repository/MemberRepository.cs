@@ -99,7 +99,7 @@ namespace MediConsultMobileApi.Repository
             member.mobile = memberDTO.Mobile;
             member.member_nid = memberDTO.SSN;
 
-            var folder = Path.Combine(serverPath, "Members", member.member_id.ToString());
+            var folder = Path.Combine(serverPath, "Members", member.member_id.ToString() , memberDTO.Photo.FileName);
 
             if (memberDTO.SSN is not null)
             {

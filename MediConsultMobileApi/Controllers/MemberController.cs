@@ -350,7 +350,7 @@ namespace MediConsultMobileApi.Controllers
                 {
 
                     var serverPath = AppDomain.CurrentDomain.BaseDirectory;
-                    var folder = Path.Combine(webHostEnvironment.WebRootPath, "Members", result.member_id.ToString());
+                    var folder = Path.Combine(webHostEnvironment.WebRootPath, "Members", result.member_id.ToString(), memberDTO.Photo.FileName);
 
 
                     if (memberDTO.Photo.Length == 0)

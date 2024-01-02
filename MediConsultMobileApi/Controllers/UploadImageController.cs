@@ -80,19 +80,19 @@ namespace MediConsultMobileApi.Controllers
             }
         }
 
-   
-    
 
-    private string GetContentType(string filePath)
-    {
-        var provider = new FileExtensionContentTypeProvider();
-        if (!provider.TryGetContentType(filePath, out var contentType))
+
+
+        private string GetContentType(string filePath)
         {
-            contentType = "application/octet-stream"; // Default content type
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(filePath, out var contentType))
+            {
+                contentType = "application/octet-stream"; // Default content type
+            }
+            return contentType;
         }
-        return contentType;
-    }
 
-       
+
     }
 }
