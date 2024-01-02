@@ -79,7 +79,7 @@ namespace MediConsultMobileApi.Controllers
                     if (Path.Exists(imageName))
                     {
                         string[] fileNames = Directory.GetFiles(imageName);
-                        return $"{imageBaseUrl}{fileNames[0]}";
+                        return $"{fileNames[0]}";
 
                     }
                     return string.Empty;
@@ -205,7 +205,6 @@ namespace MediConsultMobileApi.Controllers
 
                 }
 
-
                 string imageUrl(string imageName)
                 {
                     if (string.IsNullOrEmpty(imageName))
@@ -216,17 +215,12 @@ namespace MediConsultMobileApi.Controllers
                     if (Path.Exists(imageName))
                     {
                         string[] fileNames = Directory.GetFiles(imageName);
-                        int membersIndex = fileNames[0].IndexOf("Members");
-                        if (membersIndex != -1)
-                        {
-                            // Extract the path starting from "Members"
-                            string membersPath = fileNames[0].Substring(membersIndex);
-                            return $"{imageBaseUrl}{membersPath}";
-                        }
-                        return string.Empty;
+                        return $"{fileNames[0]}";
+
                     }
                     return string.Empty;
                 }
+
 
 
 
