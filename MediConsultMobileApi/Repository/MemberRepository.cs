@@ -99,7 +99,7 @@ namespace MediConsultMobileApi.Repository
             member.mobile = memberDTO.Mobile;
             member.member_nid = memberDTO.SSN;
 
-            var folder = Path.Combine(serverPath, "Members", member.member_id.ToString() , memberDTO.Photo.FileName);
+            var folder = Path.Combine(serverPath, "Members", member.member_id.ToString());
 
             if (memberDTO.SSN is not null)
             {
@@ -152,7 +152,7 @@ namespace MediConsultMobileApi.Repository
             if (DateTime.TryParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
             {
                 // Check if the day is less than 31.
-                return parsedDate.Day < 31 && parsedDate.Month < 12;
+                return parsedDate.Day < 32 && parsedDate.Month < 13;
             }
 
             return false;

@@ -16,39 +16,7 @@ namespace MediConsultMobileApi.Controllers
             this.webHostEnvironment = webHostEnvironment;
         }
 
-        public class FileUpload
-        {
-            public IFormFile imageUrl { get; set; }
-        }
-
-        [HttpPost]
-        public async Task<string> uploadPhoto([FromQuery] FileUpload file)
-        {
-            try
-            {
-                if (file.imageUrl.Length > 0)
-                {
-                    if (!Directory.Exists(webHostEnvironment.WebRootPath + "\\Upload\\"))
-                    {
-                        Directory.CreateDirectory(webHostEnvironment.WebRootPath + "\\Upload\\");
-                    }
-
-                    using (FileStream fileStream = System.IO.File.Create(webHostEnvironment.WebRootPath + "\\Upload\\" + file.imageUrl.FileName))
-                    {
-                        file.imageUrl.CopyTo(fileStream);
-                        fileStream.Flush();
-                        return "\\Upload\\" + file.imageUrl.FileName;
-                    }
-                }
-
-                return "Failed";
-            }
-            catch (Exception ex)
-            {
-                return ex.Message.ToString();
-            }
-        }
-
+    
 
         [HttpGet("getPhoto/{filePath}")]
         public IActionResult GetPhoto(string filePath)
@@ -69,6 +37,7 @@ namespace MediConsultMobileApi.Controllers
 
                     // Return the file with appropriate content type
                     return File(fileContent, contentType);
+
                 }
 
                 // Return not found if the file does not exist

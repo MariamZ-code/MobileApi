@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Hosting.Server;
 using System.Globalization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.StaticFiles;
+using Org.BouncyCastle.Asn1.Ocsp;
 
 namespace MediConsultMobileApi.Controllers
 {
@@ -68,18 +69,17 @@ namespace MediConsultMobileApi.Controllers
 
 
                 }
-                
+
+
                 string imageUrl(string imageName)
                 {
                     if (string.IsNullOrEmpty(imageName))
                     {
                         return string.Empty;
                     }
-                    // Concatenate the base URL with the image name to form the complete URL
 
                     if (Path.Exists(imageName))
                     {
-
                         string[] fileNames = Directory.GetFiles(imageName);
                         return $"{fileNames[0]}";
 
@@ -353,6 +353,9 @@ namespace MediConsultMobileApi.Controllers
 
                     var serverPath = AppDomain.CurrentDomain.BaseDirectory;
                     var folder = Path.Combine(webHostEnvironment.WebRootPath, "Members", result.member_id.ToString(), memberDTO.Photo.FileName);
+                    var folder2 = Path.Combine(serverPath, "Members", result.member_id.ToString());
+
+
 
 
                     if (memberDTO.Photo.Length == 0)
@@ -385,12 +388,17 @@ namespace MediConsultMobileApi.Controllers
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + memberDTO.Photo.FileName;
 
                     string filePath = Path.Combine(folder, uniqueFileName);
+                    string filePath2 = Path.Combine(folder2, uniqueFileName);
 
                     using (FileStream fileStream = System.IO.File.Create(filePath))
                     {
                         await memberDTO.Photo.CopyToAsync(fileStream);
                         fileStream.Flush();
 
+                    }
+                    using (FileStream stream = new FileStream(filePath2, FileMode.Create))
+                    {
+                        await memberDTO.Photo.CopyToAsync(stream);
                     }
                 }
 
