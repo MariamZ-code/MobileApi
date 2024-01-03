@@ -119,7 +119,7 @@ namespace MediConsultMobileApi.Repository
 
         #region CreateDateAndGender 
 
-       public (string date, string gender) CreateDateAndGender(string ssn)
+       public (string date, string gender) CreateDateAndGender(string? ssn)
         {
 
             char[] charSSN = ssn.ToCharArray();

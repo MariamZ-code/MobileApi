@@ -5,6 +5,7 @@ using MediConsultMobileApi.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
@@ -18,14 +19,14 @@ namespace MediConsultMobileApi.Controllers
         private readonly IRequestRepository requestRepo;
         private readonly IProviderDataRepository providerRepo;
         private readonly IMemberRepository memberRepo;
-        private readonly ApplicationDbContext dbContext;
+ 
 
-        public RequestController(IRequestRepository requestRepo, IProviderDataRepository providerRepo, IMemberRepository memberRepo , ApplicationDbContext dbContext)
+        public RequestController(IRequestRepository requestRepo, IProviderDataRepository providerRepo, IMemberRepository memberRepo)
         {
             this.requestRepo = requestRepo;
             this.providerRepo = providerRepo;
             this.memberRepo = memberRepo;
-            this.dbContext = dbContext;
+           
         }
 
         #region AddNewRequest
@@ -228,9 +229,20 @@ namespace MediConsultMobileApi.Controllers
                 {
                     return NotFound(new MessageDto { Message = Messages.RequestNotFound(lang)});
                 }
-              
+                if (int.Parse(request.Folder_path) == 0)
+                {
+                    return BadRequest(new MessageDto { Message = "File list is 0." });
+
+                }
+                if (string.IsNullOrEmpty(request.Folder_path) )
+                {
+                   
+                    return BadRequest(new MessageDto { Message = "File list is null." });
+                }
+
                 string[] fileNames = Directory.GetFiles(request.Folder_path);
                 List<string> fileNameList = fileNames.ToList();
+
                 var reqDto = new RequestDetailsDTO
                 {
                     Id = request.ID,
@@ -243,10 +255,9 @@ namespace MediConsultMobileApi.Controllers
 
 
                 };
-
-              
-
                 return Ok(reqDto);
+
+
 
             }
             return BadRequest(ModelState);

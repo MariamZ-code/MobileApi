@@ -390,16 +390,17 @@ namespace MediConsultMobileApi.Controllers
                     string filePath = Path.Combine(folder, uniqueFileName);
                     string filePath2 = Path.Combine(folder2, uniqueFileName);
 
-                    using (FileStream fileStream = System.IO.File.Create(filePath))
-                    {
-                        await memberDTO.Photo.CopyToAsync(fileStream);
-                        fileStream.Flush();
+                    //using (FileStream fileStream = System.IO.File.Create(filePath))
+                    //{
+                    //    await memberDTO.Photo.CopyToAsync(fileStream);
+                    //    fileStream.Flush();
 
-                    }
+                    //}
                     using (FileStream stream = new FileStream(filePath2, FileMode.Create))
                     {
                         await memberDTO.Photo.CopyToAsync(stream);
                     }
+                  
                 }
 
 
