@@ -229,22 +229,20 @@ namespace MediConsultMobileApi.Controllers
                 {
                     return NotFound(new MessageDto { Message = Messages.RequestNotFound(lang)});
                 }
-                if (int.Parse(request.Folder_path) == 0)
+                if (request.Folder_path == "0" || string.IsNullOrEmpty(request.Folder_path) )
                 {
-                    return BadRequest(new MessageDto { Message = "File list is 0." });
-
+                    return BadRequest(new MessageDto { Message = "Invalid" });
                 }
-                if (string.IsNullOrEmpty(request.Folder_path) )
+                if (!Directory.Exists(request.Folder_path))
                 {
-                   
-                    return BadRequest(new MessageDto { Message = "File list is null." });
+                    return BadRequest(new MessageDto { Message = "Invalid folder path" });
                 }
-
                 string[] fileNames = Directory.GetFiles(request.Folder_path);
                 List<string> fileNameList = fileNames.ToList();
 
                 var reqDto = new RequestDetailsDTO
                 {
+
                     Id = request.ID,
                     ApprovalId = request.Approval_id,
                     ProviderName = request.Provider?.Provider_name_en,
@@ -252,7 +250,6 @@ namespace MediConsultMobileApi.Controllers
                     Approval = null,
                     Notes = request.Notes,
                     FolderPath = fileNameList
-
 
                 };
                 return Ok(reqDto);
