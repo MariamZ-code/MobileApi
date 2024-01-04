@@ -1,4 +1,4 @@
-﻿   using FirebaseAdmin;
+﻿using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
@@ -25,7 +25,7 @@ namespace MediConsultMobileApi.Controllers
         }
 
         [HttpPost("SendNotification")]
-        public async Task<IActionResult> SendNotification([FromBody] NotificationMessage notificationMessage , string lang)
+        public async Task<IActionResult> SendNotification([FromBody] NotificationMessage notificationMessage, string lang)
         {
             if (notificationMessage == null)
             {
@@ -45,18 +45,23 @@ namespace MediConsultMobileApi.Controllers
                 return BadRequest(new MessageDto { Message = Messages.NotificationToken(lang) });
 
             }
+            var customData = new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" },
 
+            };
             if (notificationMessage.ImageUrl == string.Empty)
             {
                 var message = new MulticastMessage
                 {
+                    Tokens = firebaseTokens,
+                    Data = customData,
                     Notification = new Notification
                     {
                         Title = notificationMessage.Title,
                         Body = notificationMessage.Body,
-                        //ImageUrl = notificationMessage.ImageUrl
                     },
-                    Tokens = firebaseTokens
                 };
 
                 var response = await FirebaseMessaging.DefaultInstance.SendMulticastAsync(message);
@@ -70,15 +75,17 @@ namespace MediConsultMobileApi.Controllers
 
 
             }
+          
             var messa = new MulticastMessage
             {
+                Tokens = firebaseTokens,
+                Data = customData,
                 Notification = new Notification
                 {
                     Title = notificationMessage.Title,
                     Body = notificationMessage.Body,
                     ImageUrl = notificationMessage.ImageUrl
-                },
-                Tokens = firebaseTokens
+                }
             };
 
             var respo = await FirebaseMessaging.DefaultInstance.SendMulticastAsync(messa);
@@ -99,18 +106,25 @@ namespace MediConsultMobileApi.Controllers
 
         [Route("SendNotificationToAll")]
         [HttpPost]
-        public async Task<IActionResult> SendNotificationToAll([Required][FromBody] NotificationMessageToAll notificationMessage , string lang)
+        public async Task<IActionResult> SendNotificationToAll([Required][FromBody] NotificationMessageToAll notificationMessage, string lang)
         {
+            var customData = new Dictionary<string, string>
+            {
+                { "key1", "value1" },
+                { "key2", "value2" },
 
+            };
             if (notificationMessage.ImageUrl == string.Empty)
             {
+
                 var message = new Message
                 {
+                    Data = customData,
                     Notification = new Notification
                     {
                         Title = notificationMessage.Title,
                         Body = notificationMessage.Body,
-                        
+
                     },
                     Topic = "all"
                 };
@@ -128,6 +142,8 @@ namespace MediConsultMobileApi.Controllers
             }
             var messa = new Message
             {
+
+                Data = customData,
                 Notification = new Notification
                 {
                     Title = notificationMessage.Title,
@@ -145,7 +161,7 @@ namespace MediConsultMobileApi.Controllers
 
         }
     }
-    
+
 
 
 }

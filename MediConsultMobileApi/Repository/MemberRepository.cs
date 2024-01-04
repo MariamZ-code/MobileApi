@@ -2,6 +2,7 @@
 using MediConsultMobileApi.DTO;
 using MediConsultMobileApi.Models;
 using MediConsultMobileApi.Repository.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Reflection;
@@ -94,12 +95,14 @@ namespace MediConsultMobileApi.Repository
         public  void UpdateMember(UpdateMemberDTO memberDTO , int id)
         {
             var serverPath = AppDomain.CurrentDomain.BaseDirectory;
+            var folder = Path.Combine(serverPath, "Members", id.ToString(), memberDTO.Photo.FileName);
+
             var member =  MemberDetails(id);
             member.email = memberDTO.Email;
             member.mobile = memberDTO.Mobile;
             member.member_nid = memberDTO.SSN;
 
-            var folder = Path.Combine(serverPath, "Members", member.member_id.ToString());
+            //var folder = Path.Combine(serverPath, "Members", member.member_id.ToString() );
 
             if (memberDTO.SSN is not null)
             {
@@ -108,9 +111,9 @@ namespace MediConsultMobileApi.Repository
            
                 member.member_gender = gender;
             }
-            member.member_photo =folder;
-                
-            
+            member.member_photo = folder;
+
+
             dbContext.clientBranchMembers.Update(member);
             
 
@@ -154,13 +157,14 @@ namespace MediConsultMobileApi.Repository
             // Parse the date to get the day part.
             if (DateTime.TryParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
             {
-                // Check if the day is less than 31.
+               
                 return parsedDate.Day < 32 && parsedDate.Month < 13;
             }
 
             return false;
         }
         #endregion
+
         public void SaveDatabase()
         {
             dbContext.SaveChanges();

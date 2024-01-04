@@ -17,6 +17,7 @@ using System.Globalization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.StaticFiles;
 using Org.BouncyCastle.Asn1.Ocsp;
+using Microsoft.Extensions.FileProviders;
 
 namespace MediConsultMobileApi.Controllers
 {
@@ -28,7 +29,7 @@ namespace MediConsultMobileApi.Controllers
         private readonly IValidation validation;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly string imageBaseUrl = "https://api.mediconsulteg.com/";
-        public MemberController(IMemberRepository memberRepo, IValidation validation , IWebHostEnvironment webHostEnvironment)
+        public MemberController(IMemberRepository memberRepo, IValidation validation, IWebHostEnvironment webHostEnvironment)
         {
             this.memberRepo = memberRepo;
             this.validation = validation;
@@ -70,24 +71,7 @@ namespace MediConsultMobileApi.Controllers
 
                 }
 
-
-                string imageUrl(string imageName)
-                {
-                    if (string.IsNullOrEmpty(imageName))
-                    {
-                        return string.Empty;
-                    }
-
-                    if (Path.Exists(imageName))
-                    {
-                        string[] fileNames = Directory.GetFiles(imageName);
-                        return $"{fileNames[0]}";
-
-                    }
-                    return string.Empty;
-                }
-
-
+               
 
                 if (lang == "en")
                 {
@@ -98,7 +82,7 @@ namespace MediConsultMobileApi.Controllers
                         member_name = member.member_name,
                         email = member.email,
                         room_class = member.room_class,
-                        member_photo = imageUrl(member.member_photo),
+                        member_photo = member.member_photo,
                         mobile = member.mobile,
                         program_name = member.Type_Name_En,
                         member_status = member.member_status,
@@ -122,7 +106,7 @@ namespace MediConsultMobileApi.Controllers
                     member_name = member.member_name,
                     email = member.email,
                     room_class = member.room_class,
-                    member_photo = imageUrl(member.member_photo),
+                    member_photo = member.member_photo,
                     mobile = member.mobile,
                     program_name = member.Type_Name_Ar,
                     member_status = member.member_status,
@@ -207,25 +191,7 @@ namespace MediConsultMobileApi.Controllers
 
                 }
 
-                string imageUrl(string imageName)
-                {
-                    if (string.IsNullOrEmpty(imageName))
-                    {
-                        return string.Empty;
-                    }
-
-                    if (Path.Exists(imageName))
-                    {
-                        string[] fileNames = Directory.GetFiles(imageName);
-                        return $"{fileNames[0]}";
-
-                    }
-                    return string.Empty;
-                }
-
-
-
-
+              
                 var memberDTo = new MemberDetailsDTO
                 {
 
@@ -234,12 +200,13 @@ namespace MediConsultMobileApi.Controllers
                     member_gender = member.member_gender,
                     email = member.email,
                     member_nid = member.member_nid,
-                    member_photo =imageUrl(member.member_photo),
+                    member_photo = member.member_photo,
                     mobile = member.mobile,
                     birthDate = member.member_birthday,
                     jobTitle = member.job_title
 
                 };
+
                 return Ok(memberDTo);
             }
             return BadRequest(ModelState);
@@ -264,7 +231,7 @@ namespace MediConsultMobileApi.Controllers
                     return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
                 }
-               
+
                 var existingMemberWithSameMobile = memberRepo.GetMemberByMobile(memberDTO.Mobile);
                 var existingMemberWithSameEmail = memberRepo.GetMemberByEmail(memberDTO.Email);
                 var existingMemberWithSameNationalId = memberRepo.GetMemberByNationalId(memberDTO.SSN);
@@ -387,20 +354,20 @@ namespace MediConsultMobileApi.Controllers
 
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + memberDTO.Photo.FileName;
 
-                    string filePath = Path.Combine(folder, uniqueFileName);
+
+
+
+                    //string filePath = Path.Combine(folder, uniqueFileName);
                     string filePath2 = Path.Combine(folder2, uniqueFileName);
 
-                    //using (FileStream fileStream = System.IO.File.Create(filePath))
-                    //{
-                    //    await memberDTO.Photo.CopyToAsync(fileStream);
-                    //    fileStream.Flush();
 
-                    //}
                     using (FileStream stream = new FileStream(filePath2, FileMode.Create))
                     {
                         await memberDTO.Photo.CopyToAsync(stream);
                     }
-                  
+                    memberDTO.Photo = ConvertFilePathToIFormFile(filePath2);
+
+
                 }
 
 
@@ -411,6 +378,28 @@ namespace MediConsultMobileApi.Controllers
             }
             return BadRequest(ModelState);
         }
+        private IFormFile ConvertFilePathToIFormFile(string filePath)
+        {
+            if (Path.Exists(filePath))
+            {
+                var fileInfo = new FileInfo(filePath);
+                var fileStream = fileInfo.OpenRead();
+
+                var file = new FormFile(fileStream, 0, fileStream.Length, null, fileInfo.Name)
+                {
+                    Headers = new HeaderDictionary(),
+                    ContentType = "application/octet-stream" // Adjust the content type if needed
+                };
+
+                return file;
+            }
+            else
+            {
+                // Handle the case where the file does not exist
+                throw new FileNotFoundException($"File not found at: {filePath}");
+            }
+        }
+
 
 
 

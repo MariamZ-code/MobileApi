@@ -46,6 +46,7 @@ namespace MediConsultMobileApi.Controllers
             return random.Next(100000, 999999).ToString();
         }
         #endregion
+
         #region Registeration
 
         [HttpPost("Registeration")]
