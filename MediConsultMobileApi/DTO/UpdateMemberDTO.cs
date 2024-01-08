@@ -11,9 +11,6 @@ namespace MediConsultMobileApi.DTO
         public string? Email { get; set; }
         public IFormFile? Photo { get; set; }
 
-        [JsonIgnore]
-        public string? uniqueFileName { get; set; }
-
 
     }
 }

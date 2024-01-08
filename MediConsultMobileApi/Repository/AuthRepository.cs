@@ -9,6 +9,7 @@ using System.Net;
 using MediConsultMobileApi.Language;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
+using Google.Apis.Util;
 
 namespace MediConsultMobileApi.Repository
 {
@@ -17,7 +18,7 @@ namespace MediConsultMobileApi.Repository
         private readonly ApplicationDbContext dbContext;
         private readonly IMemberRepository memberRepo;
 
-        public AuthRepository(ApplicationDbContext dbContext , IMemberRepository memberRepo)
+        public AuthRepository(ApplicationDbContext dbContext, IMemberRepository memberRepo)
         {
             this.dbContext = dbContext;
             this.memberRepo = memberRepo;
@@ -25,7 +26,7 @@ namespace MediConsultMobileApi.Repository
 
 
         #region GetClientBranchMemberById
-        public ClientBranchMember  GetById(int memberId)
+        public ClientBranchMember GetById(int memberId)
         {
             return dbContext.clientBranchMembers.FirstOrDefault(m => m.member_id == memberId);
         }
@@ -45,35 +46,47 @@ namespace MediConsultMobileApi.Repository
             member.member_birthday = createDateAndGender.date;
             member.member_gender = createDateAndGender.gender;
 
-            var memberPassword = ResetPassword(memberId);
+            var memberPassword = GetById(memberId);
             memberPassword.the_password = userDto.Password;
 
             dbContext.clientBranchMembers.Update(member);
-            dbContext.logins.Update(memberPassword);
+         
 
         }
         #endregion
 
         #region Login
-        public async Task<MessageDto> Login(LoginUserDto userDto , string lang)
+        public async Task<MessageDto> Login(LoginUserDto userDto, string lang)
         {
             var authDto = new MessageDto();
-            var user = await dbContext.logins.FirstOrDefaultAsync(u => u.member_id == int.Parse(userDto.Id) && u.the_password == userDto.Password);
-         
-            if (user is null)
+            var member = new ClientBranchMember();
+            if (userDto.Id.Length > 13)
             {
-               authDto.Message = Messages.PasswordAndIdIncorrect(lang);
-               
-                return authDto;
+
+                member = await dbContext.clientBranchMembers.FirstOrDefaultAsync(u => u.member_nid == userDto.Id.ToString());
+
             }
-          
-            if (user.is_enabled == 0)
+            else
             {
-                authDto.Message =Messages.AccountDisabled(lang);
+
+                member = await dbContext.clientBranchMembers.FirstOrDefaultAsync(u => u.member_id == int.Parse(userDto.Id));
+            }
+
+
+            if (member is null || await dbContext.clientBranchMembers.FirstOrDefaultAsync(u=> u.the_password == userDto.Password) is null  )
+            {
+                authDto.Message = Messages.PasswordAndIdIncorrect(lang);
 
                 return authDto;
             }
-            
+
+            if (member.is_enabled == 0)
+            {
+                authDto.Message = Messages.AccountDisabled(lang);
+
+                return authDto;
+            }
+
             authDto.Message = Messages.LoginSuccessfully(lang);
 
             return authDto;
@@ -83,30 +96,23 @@ namespace MediConsultMobileApi.Repository
         #region MemberExists
         public bool MemberLoginExists(int? memberId)
         {
-            return dbContext.logins.Any(m => m.member_id == memberId);
+            return dbContext.clientBranchMembers.Any(m => m.member_id == memberId);
 
         }
 
 
         #endregion
 
-        #region ResetPassword
-
-        public Login ResetPassword(int memberId)
-        {
-           return dbContext.logins.FirstOrDefault(m => m.member_id == memberId);
-        }
-
-        #endregion
+      
 
         #region SendOtp
 
-        public  void SendOtp(string otp, int memberId)
+        public void SendOtp(string otp, int memberId)
         {
-            Login member = ResetPassword(memberId);
+            ClientBranchMember member = GetById(memberId);
             member.Otp = otp;
 
-            dbContext.logins.Update(member);
+            dbContext.clientBranchMembers.Update(member);
             dbContext.SaveChanges();
 
         }
@@ -114,29 +120,29 @@ namespace MediConsultMobileApi.Repository
 
         #region ChangePassword
 
-        public void ChangePass(string otp,int id , ChangePasswordDTO changeDto)
+        public void ChangePass(string otp, int id, ChangePasswordDTO changeDto)
         {
-            var member = ResetPassword(id);
+            var member = GetById(id);
 
-          
-                member.the_password = changeDto.Password;
 
-                dbContext.logins.Update(member);
+            member.the_password = changeDto.Password;
 
-                dbContext.SaveChanges();
+            dbContext.clientBranchMembers.Update(member);
+
+            dbContext.SaveChanges();
 
         }
 
         #endregion
 
         #region SaveChange
-            public  void Save()
-            { 
+        public void Save()
+        {
 
-                dbContext.SaveChanges();
-
-            }
-         #endregion
+            dbContext.SaveChanges();
 
         }
+        #endregion
+
+    }
 }

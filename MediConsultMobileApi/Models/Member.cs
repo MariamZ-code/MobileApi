@@ -29,6 +29,7 @@ namespace MediConsultMobileApi.Models
 
         // TODO : Add Column to DB
         public string? member_birthday { get; set; }
+ 
 
 
     }

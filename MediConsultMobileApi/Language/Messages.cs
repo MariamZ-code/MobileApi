@@ -224,5 +224,12 @@
         {
             return language == "ar" ? "تم التسجيل بنجاح" : "Successfully registered";
         }
+
+        // Registeration
+
+        public static string AccountExists(string language)
+        {
+            return language == "ar" ? "الحساب موجود بالفعل" : "Account already exists";
+        }
     }
 }

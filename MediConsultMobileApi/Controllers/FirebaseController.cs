@@ -35,7 +35,7 @@ namespace MediConsultMobileApi.Controllers
 
             var userIds = notificationMessage.membersIds.Select(id => id.ToString()).ToList();
 
-            var firebaseTokens = await dbContext.logins
+            var firebaseTokens = await dbContext.clientBranchMembers
                 .Where(x => userIds.Contains(x.member_id.ToString()) && x.firebase_token != null)
                 .Select(x => x.firebase_token)
                 .ToListAsync();

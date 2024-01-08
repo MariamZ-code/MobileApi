@@ -41,5 +41,16 @@ namespace MediConsultMobileApi.Models
 
         public string? job_title { get; set; }
 
+        // TODO : Add Column to DB
+        public string? the_password { get; set; }
+
+        // TODO : Add Column to DB
+        public int? is_enabled { get; set; }
+
+        // TODO : Add Column to DB
+        public string? firebase_token { get; set; }
+
+        // TODO : Add Column to DB
+        public string? Otp { get; set; }
     }
 }

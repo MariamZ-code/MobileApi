@@ -15,7 +15,7 @@ namespace MediConsultMobileApi.Repository
         }
         public void SaveToken(FirebaseTokenDTO tokenDto)
         {
-            var member = dbContext.logins.FirstOrDefault(x=> x.member_id== tokenDto.MemberId);
+            var member = dbContext.clientBranchMembers.FirstOrDefault(x=> x.member_id== tokenDto.MemberId);
 
             member.member_id = tokenDto.MemberId;
             member.firebase_token = tokenDto.Firebase_token;

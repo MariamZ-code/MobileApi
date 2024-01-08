@@ -10,7 +10,9 @@ namespace MediConsultMobileApi.Repository.Interfaces
 
         bool MemberLoginExists(int? memberId);
 
-        Login ResetPassword(int memberId);
+         ClientBranchMember GetById(int memberId);
+
+      
 
         void SendOtp(string otp, int memberId);
 

@@ -56,13 +56,18 @@ namespace MediConsultMobileApi.Controllers
             if (ModelState.IsValid)
             {
                 var memberExists = memberRepo.MemberExists(id);
-                var member = authRepo.ResetPassword(id);
+                var member = authRepo.GetById(id);
 
                 if (!memberExists)
                 {
 
                     return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
+                }
+
+                if (member.the_password is not null || !string.IsNullOrEmpty(member.the_password))
+                {
+                    return BadRequest(new MessageDto { Message = Messages.AccountExists(lang) });
                 }
                 var memberLoginExists = authRepo.MemberLoginExists(id);
                 if (!memberLoginExists)
@@ -217,7 +222,7 @@ namespace MediConsultMobileApi.Controllers
         public async Task<IActionResult> Login(LoginUserDto userDto, string lang)
         {
           
-            if (userDto.Id == string.Empty || userDto.Password == string.Empty)
+            if (string.IsNullOrEmpty(userDto.Id)  || string.IsNullOrEmpty(userDto.Password))
             {
                 return BadRequest(new MessageDto { Message = Messages.PasswordAndIdRequired(lang) });
 
@@ -227,27 +232,45 @@ namespace MediConsultMobileApi.Controllers
                 return BadRequest(new MessageDto { Message = Messages.InvalidId(lang) });
 
             }
-            var memberExists = memberRepo.MemberExists(int.Parse(userDto.Id));
-            if (!memberExists)
+
+            if (userDto.Id.Length == 14 )
             {
-                return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+                if (!memberRepo.SSNExists(userDto.Id))
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
+
+                }
+              var user1 = await authRepo.Login(userDto, lang); 
+                if (user1.Message == Messages.PasswordAndIdIncorrect(lang) || user1.Message == Messages.AccountDisabled(lang))
+                {
+                    return BadRequest(new MessageDto { Message = Messages.PasswordAndIdIncorrect(lang) });
+                }
+              return Ok(user1);
 
             }
-
-            var user = await authRepo.Login(userDto, lang);
-
-            if (user.Message == Messages.PasswordAndIdIncorrect(lang) || user.Message == Messages.AccountDisabled(lang))
+            else
             {
-                return BadRequest(new MessageDto { Message = Messages.PasswordAndIdIncorrect(lang)});
-            }
+                var memberExists = memberRepo.MemberExists(int.Parse(userDto.Id));
+                if (!memberExists)
+                {
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
-            return Ok(user);
+                }
+
+                var user = await authRepo.Login(userDto, lang);
+
+                if (user.Message == Messages.PasswordAndIdIncorrect(lang) || user.Message == Messages.AccountDisabled(lang))
+                {
+                    return BadRequest(new MessageDto { Message = Messages.PasswordAndIdIncorrect(lang)});
+                }
+
+              return Ok(user);
+            }
+            
+
 
         }
         #endregion
-
-      
-
 
 
         #region ResetPasswordSendOTPSMS
@@ -257,7 +280,7 @@ namespace MediConsultMobileApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                var member = authRepo.ResetPassword(memberId);
+                var member = authRepo.GetById(memberId);
                 var memberExists = memberRepo.MemberExists(memberId);
                 if (!memberExists)
                 {
@@ -325,7 +348,7 @@ namespace MediConsultMobileApi.Controllers
 
         public IActionResult SendEmail(int memberId , string lang)
         {
-            var member = authRepo.ResetPassword(memberId);
+            var member = authRepo.GetById(memberId);
             var memberExists = memberRepo.MemberExists(memberId);
             if (!memberExists)
             {
@@ -393,7 +416,7 @@ namespace MediConsultMobileApi.Controllers
             if (ModelState.IsValid)
             {
 
-                var member = authRepo.ResetPassword(id);
+                var member = authRepo.GetById(id);
                 if (member is null)
                 {
                     return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
