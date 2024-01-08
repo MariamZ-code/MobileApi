@@ -68,7 +68,7 @@ namespace MediConsultMobileApi.Repository
         #region RequestByRequestId
         public async Task<Request> GetById(int RequestId)
         {
-            return await dbContext.Requests.FirstOrDefaultAsync(r => r.ID == RequestId);
+            return await dbContext.Requests.Include(p => p.Provider).FirstOrDefaultAsync(r => r.ID == RequestId);
         }
         #endregion
 

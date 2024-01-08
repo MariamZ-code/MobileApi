@@ -19,21 +19,21 @@ namespace MediConsultMobileApi.Controllers
         private readonly IRequestRepository requestRepo;
         private readonly IProviderDataRepository providerRepo;
         private readonly IMemberRepository memberRepo;
- 
+
 
         public RequestController(IRequestRepository requestRepo, IProviderDataRepository providerRepo, IMemberRepository memberRepo)
         {
             this.requestRepo = requestRepo;
             this.providerRepo = providerRepo;
             this.memberRepo = memberRepo;
-           
+
         }
 
         #region AddNewRequest
         [HttpPost]
 
-        
-        public async Task<IActionResult> PostRequest([FromForm] RequestDTO requestDto, [FromForm] List<IFormFile> files , string lang)
+
+        public async Task<IActionResult> PostRequest([FromForm] RequestDTO requestDto, [FromForm] List<IFormFile> files, string lang)
         {
 
             const long maxSizeBytes = 5 * 1024 * 1024;
@@ -44,11 +44,11 @@ namespace MediConsultMobileApi.Controllers
                 var memberExists = memberRepo.MemberExists(requestDto.Member_id);
                 if (requestDto.Provider_id is null)
                 {
-                    return BadRequest(new MessageDto { Message = Messages.EnterProvider(lang)});
+                    return BadRequest(new MessageDto { Message = Messages.EnterProvider(lang) });
                 }
                 if (!providerExists)
                 {
-                    return BadRequest(new MessageDto { Message = Messages.ProviderNotFound(lang)});
+                    return BadRequest(new MessageDto { Message = Messages.ProviderNotFound(lang) });
                 }
                 if (requestDto.Member_id is null)
                 {
@@ -57,7 +57,7 @@ namespace MediConsultMobileApi.Controllers
 
                 if (!memberExists)
                 {
-                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang)});
+                    return BadRequest(new MessageDto { Message = Messages.MemberNotFound(lang) });
 
                 }
 
@@ -81,7 +81,7 @@ namespace MediConsultMobileApi.Controllers
                         return BadRequest(new MessageDto { Message = Messages.SizeOfFile(lang) });
                     }
                     // image.png --0
-                    switch (Path.GetExtension( files[j].FileName))
+                    switch (Path.GetExtension(files[j].FileName))
                     {
                         case ".pdf":
                         case ".png":
@@ -127,7 +127,7 @@ namespace MediConsultMobileApi.Controllers
         #region RequestByMemberId
         [HttpGet("MemberId")]
 
-        public IActionResult GetbyMemberId(string lang ,[Required] int memberId, [FromQuery] string? startDate, [FromQuery] string? endDate, [FromQuery] string[]? status, [FromQuery] string[]? providers, [FromQuery] int startpage = 1, [FromQuery] int pageSize = 10)
+        public IActionResult GetbyMemberId(string lang, [Required] int memberId, [FromQuery] string? startDate, [FromQuery] string? endDate, [FromQuery] string[]? status, [FromQuery] string[]? providers, [FromQuery] int startpage = 1, [FromQuery] int pageSize = 10)
         {
             if (ModelState.IsValid)
             {
@@ -143,11 +143,11 @@ namespace MediConsultMobileApi.Controllers
                 }
                 if (requests is null)
                 {
-                    return NotFound(new MessageDto { Message =Messages.RequestNotFound(lang) });
+                    return NotFound(new MessageDto { Message = Messages.RequestNotFound(lang) });
 
                 }
 
-             
+
                 if (status != null && status.Any())
                 {
                     for (int i = 0; i < status.Length; i++)
@@ -160,10 +160,17 @@ namespace MediConsultMobileApi.Controllers
                 {
                     for (int i = 0; i < providers.Length; i++)
                     {
-                        var provider = providers[i]; 
-                    requests = requests.Where(p => p.Provider.Provider_name_en.Contains(provider));
+                        var provider = providers[i];
+                        if (lang == "en")
+                        {
+                            requests = requests.Where(p => p.Provider.provider_name_en.Contains(provider));
+                        }
+                        else
+                        {
+                            requests = requests.Where(p => p.Provider.provider_name_ar.Contains(provider));
+                        }
                     }
-                   
+
 
                 }
                 if (endDate is not null || startDate is not null)
@@ -179,26 +186,61 @@ namespace MediConsultMobileApi.Controllers
                                entityDate <= endDat)
                         .AsQueryable();
                 }
+               
+
+                
                 var totalProviders = requests.Count();
-                requests = requests.Skip((startpage - 1) * pageSize).Take(pageSize).OrderByDescending(e => e.Provider.Provider_name_en);
+                if (lang == "en")
+                {
+                    requests = requests.Skip((startpage - 1) * pageSize).Take(pageSize).OrderBy(e => e.Provider.provider_name_en);
+
+                    foreach (var request in requests)
+                    {
+
+
+                        RequestDetailsForMemberDTO reqDetalisEnDto = new RequestDetailsForMemberDTO
+                        {
+
+                            Id = request.ID,
+                            CreatedDate = request.created_date,
+                            ProviderName = request.Provider.provider_name_en,
+                            Status = request.Status
+
+                        };
+
+                        reqDto.Add(reqDetalisEnDto);
+                    }
+                    var medicalDto = new
+                    {
+
+                        TotalCount = totalProviders,
+                        PageNumber = startpage,
+                        PageSize = pageSize,
+                        Requests = reqDto,
+
+
+                    };
+                    return Ok(medicalDto);
+
+                }
+
+                requests = requests.Skip((startpage - 1) * pageSize).Take(pageSize).OrderBy(e => e.Provider.provider_name_ar);
+
                 foreach (var request in requests)
                 {
-                   
-
-                    RequestDetailsForMemberDTO reqDetalisDto = new RequestDetailsForMemberDTO
+                    RequestDetailsForMemberDTO reqDetalisArDto = new RequestDetailsForMemberDTO
                     {
 
                         Id = request.ID,
                         CreatedDate = request.created_date,
-                        ProviderName = request.Provider.Provider_name_en,
+                        ProviderName = request.Provider.provider_name_ar,
                         Status = request.Status
 
                     };
 
-                    reqDto.Add(reqDetalisDto);
+                    reqDto.Add(reqDetalisArDto);
                 }
-
-                var medicalDto = new
+                var medicalArDto = new
                 {
 
                     TotalCount = totalProviders,
@@ -208,58 +250,73 @@ namespace MediConsultMobileApi.Controllers
 
 
                 };
-
-                return Ok(medicalDto);
+                return Ok(medicalArDto);
             }
             return BadRequest(ModelState);
 
-        }
+    }
 
-        #endregion
+    #endregion
 
-        #region RequestByRequestId
-        [HttpGet("RequestId")]
+    #region RequestByRequestId
+    [HttpGet("RequestId")]
 
-        public async Task<IActionResult> GetResultByID([Required] int id , string lang)
+    public async Task<IActionResult> GetResultByID([Required] int id, string lang)
+    {
+        if (ModelState.IsValid)
         {
-            if (ModelState.IsValid)
+            var request = await requestRepo.GetById(id);
+            if (request is null)
             {
-                var request = await requestRepo.GetById(id);
-                if (request is null)
-                {
-                    return NotFound(new MessageDto { Message = Messages.RequestNotFound(lang)});
-                }
-                if (request.Folder_path == "0" || string.IsNullOrEmpty(request.Folder_path) )
-                {
-                    return BadRequest(new MessageDto { Message = "Invalid" });
-                }
-                if (!Directory.Exists(request.Folder_path))
-                {
-                    return BadRequest(new MessageDto { Message = "Invalid folder path" });
-                }
-                string[] fileNames = Directory.GetFiles(request.Folder_path);
-                List<string> fileNameList = fileNames.ToList();
+                return NotFound(new MessageDto { Message = Messages.RequestNotFound(lang) });
+            }
+            if (request.Folder_path == "0" || string.IsNullOrEmpty(request.Folder_path))
+            {
+                return BadRequest(new MessageDto { Message = "Invalid" });
+            }
+            if (!Directory.Exists(request.Folder_path))
+            {
+                return BadRequest(new MessageDto { Message = "Invalid folder path" });
+            }
+            string[] fileNames = Directory.GetFiles(request.Folder_path);
+            List<string> fileNameList = fileNames.ToList();
 
-                var reqDto = new RequestDetailsDTO
+            if (lang == "en")
+            {
+                var reqEnDto = new RequestDetailsDTO
                 {
 
                     Id = request.ID,
                     ApprovalId = request.Approval_id,
-                    ProviderName = request.Provider?.Provider_name_en,
+                    ProviderName = request.Provider?.provider_name_en,
                     ProviderId = request.Provider_id,
                     Approval = null,
                     Notes = request.Notes,
                     FolderPath = fileNameList
 
                 };
-                return Ok(reqDto);
-
-
-
+                return Ok(reqEnDto);
             }
-            return BadRequest(ModelState);
+
+            var reqArDto = new RequestDetailsDTO
+            {
+
+                Id = request.ID,
+                ApprovalId = request.Approval_id,
+                ProviderName = request.Provider?.provider_name_ar,
+                ProviderId = request.Provider_id,
+                Approval = null,
+                Notes = request.Notes,
+                FolderPath = fileNameList
+
+            };
+            return Ok(reqArDto);
+
+
         }
-        #endregion
-     
+        return BadRequest(ModelState);
     }
+    #endregion
+
+}
 }

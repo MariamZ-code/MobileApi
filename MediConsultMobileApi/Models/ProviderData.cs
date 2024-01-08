@@ -8,15 +8,15 @@ namespace MediConsultMobileApi.Models
     public class ProviderData
     {
         [Key]
-        public int Provider_id { get; set; }
+        public int provider_id { get; set; }
 
         [Required]
         [StringLength(200)]  
-        public string Provider_name_en { get; set; }
+        public string provider_name_en { get; set; }
 
         [StringLength(200)]
 
-        public string Provider_name_ar { get; set; }
+        public string provider_name_ar { get; set; }
         [StringLength(50)]
 
         public string provider_oid { get; set; }

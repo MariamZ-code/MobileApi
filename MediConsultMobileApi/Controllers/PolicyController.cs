@@ -21,22 +21,42 @@ namespace MediConsultMobileApi.Controllers
 
         [HttpGet("ProgramId")]
 
-        public async Task<IActionResult> GetByProgramId(int programId , string lang)
+        public async Task<IActionResult> GetByProgramId(int programId, string lang)
         {
             if (ModelState.IsValid)
             {
-               var serviceExists =  policyRepo.ServiceExists(programId);
-               var policies = await policyRepo.GetByProgramId(programId);
+                var serviceExists = policyRepo.ServiceExists(programId);
+                var policies = await policyRepo.GetByProgramId(programId);
 
-              
+
                 if (serviceExists)
                 {
-                    return BadRequest(new MessageDto { Message = Messages.Policy(lang)});
+                    return BadRequest(new MessageDto { Message = Messages.Policy(lang) });
                 }
-                var policyListDto = new List<PolicyDTO>();
+                var policyListArDto = new List<PolicyArDTO>();
+                var policyListEnDto = new List<PolicyEnDTO>();
+                if (lang == "en")
+                {
+                    foreach (var policy in policies)
+                    {
+                        var policyEnDto = new PolicyEnDTO
+                        {
+                            Policy_id = policy.Policy_id,
+                            Program_id = policy.Program_id,
+                            Service_Class_Id = policy.Service_Class_Id,
+                            SL_Copayment = policy.SL_Copayment,
+                            SL_Limit = policy.SL_Limit,
+                            ServiceNameEn = policy.Service?.Service_Class_Name_En
+
+                        };
+                        policyListEnDto.Add(policyEnDto);
+                    }
+                    return Ok(policyListEnDto);
+
+                }
                 foreach (var policy in policies)
                 {
-                    var policyDto = new PolicyDTO
+                    var policyArDto = new PolicyArDTO
                     {
                         Policy_id = policy.Policy_id,
                         Program_id = policy.Program_id,
@@ -44,12 +64,13 @@ namespace MediConsultMobileApi.Controllers
                         SL_Copayment = policy.SL_Copayment,
                         SL_Limit = policy.SL_Limit,
                         ServiceNameAr = policy.Service?.Service_Class_Name_Ar,
-                        ServiceNameEn = policy.Service?.Service_Class_Name_En
 
                     };
-                    policyListDto.Add(policyDto);
+                    policyListArDto.Add(policyArDto);
                 }
-                return Ok(policyListDto);
+
+
+                return Ok(policyListArDto);
 
 
             }

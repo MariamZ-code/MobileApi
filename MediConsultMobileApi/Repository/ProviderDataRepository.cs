@@ -22,7 +22,7 @@ namespace MediConsultMobileApi.Repository
         }
         public async Task<bool> ProviderExistsAsync(int? providerId)
         {
-            return await dbContext.Providers.AnyAsync(p => p.Provider_id == providerId);
+            return await dbContext.Providers.AnyAsync(p => p.provider_id == providerId);
         }
     }
 }
